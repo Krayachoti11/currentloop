@@ -48,14 +48,24 @@ public class ThreadController {
                 .orElseThrow(() -> new RuntimeException("Topic not found"));
 
         return threadRepository.findBySubtopicIdOrderByCreatedAtDesc(subtopic.getId()).stream().map(thread -> {
-            User user = userRepository.findById(thread.getAuthorId())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            return toThreadMap(thread, user.getUsername(), topic.getSlug(), subtopic.getSlug());
+            User user = userRepository.findById(thread.getAuthorId()).orElse(null);
+
+            String username = (user != null) ? user.getUsername() : "Unknown";
+
+            return toThreadMap(thread, username, topic.getSlug(), subtopic.getSlug());
         }).toList();
     }
 
-    @GetMapping("/threads/{id}")
-    public Map<String, Object> getThread(@PathVariable Long id) {
+    return Map.of(
+        "id", thread.getId(),
+        "title", thread.getTitle(),
+        "body", thread.getBody(),
+        "authorId", thread.getAuthorId(),
+        "username", username,
+        "subtopicId", thread.getSubtopicId(),
+        "replyCount", thread.getReplyCount(),
+        "createdAt", thread.getCreatedAt()
+    );
         Thread thread = threadRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Thread not found"));
         User user = userRepository.findById(thread.getAuthorId())
@@ -147,7 +157,7 @@ public class ThreadController {
         threadMap.put("title", thread.getTitle());
         threadMap.put("body", thread.getBody());
         threadMap.put("authorId", thread.getAuthorId());
-        threadMap.put("username", username);
+        threadMap.put("username", user.getUsername());
         threadMap.put("subtopicId", thread.getSubtopicId());
         threadMap.put("replyCount", thread.getReplyCount());
         threadMap.put("createdAt", thread.getCreatedAt());
