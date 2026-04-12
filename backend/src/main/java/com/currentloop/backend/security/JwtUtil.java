@@ -1,37 +1,44 @@
 package com.currentloop.backend.security;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import java.security.Key;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
 
-    private static final String SECRET = "currentloop-secret-key-must-be-at-least-32-chars";
-    private static final long EXPIRATION = 1000 * 60 * 60 * 24; // 24 hours
+    private final SecretKey key;
+    private static final long EXPIRATION_MS = 1000L * 60 * 60 * 24;
 
-    private Key getKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes());
+    public JwtUtil(@Value("${jwt.secret}") String secret) {
+        if (secret == null || secret.length() < 32) {
+            throw new IllegalStateException("jwt.secret must be at least 32 characters");
+        }
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     public String generateToken(String username) {
         return Jwts.builder()
-            .subject(username)
-            .issuedAt(new Date())
-            .expiration(new Date(System.currentTimeMillis() + EXPIRATION))
-            .signWith(getKey())
-            .compact();
+                .subject(username)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_MS))
+                .signWith(key)
+                .compact();
     }
 
     public String extractUsername(String token) {
         return Jwts.parser()
-            .verifyWith((javax.crypto.SecretKey) getKey())
-            .build()
-            .parseSignedClaims(token)
-            .getPayload()
-            .getSubject();
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
     }
 
     public boolean validateToken(String token) {

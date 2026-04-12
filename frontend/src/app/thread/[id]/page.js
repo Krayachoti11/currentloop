@@ -1,13 +1,25 @@
+import Link from "next/link"
+import ReplyBox from "./ReplyBox"
+import { apiUrl } from "@/lib/api"
+
 async function getThread(id) {
-  const res = await fetch("http://localhost:8080/api/threads/" + id)
-  if (!res.ok) return null
-  return res.json()
+  try {
+    const res = await fetch(apiUrl(`/api/threads/${id}`), { cache: "no-store" })
+    if (!res.ok) return null
+    return res.json()
+  } catch {
+    return null
+  }
 }
 
 async function getReplies(id) {
-  const res = await fetch("http://localhost:8080/api/threads/" + id + "/replies")
-  if (!res.ok) return []
-  return res.json()
+  try {
+    const res = await fetch(apiUrl(`/api/threads/${id}/replies`), { cache: "no-store" })
+    if (!res.ok) return []
+    return res.json()
+  } catch {
+    return []
+  }
 }
 
 export default async function ThreadPage(props) {
@@ -19,81 +31,108 @@ export default async function ThreadPage(props) {
 
   if (!thread) {
     return (
-      <main style={{ fontFamily: "sans-serif", padding: "40px" }}>
-        Thread not found.
+      <main style={{ padding: "40px", background: "#f26b1d", minHeight: "100vh", color: "#111" }}>
+        Thread not found
       </main>
     )
   }
 
+  const backHref =
+    thread.topicSlug && thread.subtopicSlug
+      ? `/topics/${thread.topicSlug}/${thread.subtopicSlug}`
+      : "/community"
+
+  const backLabel =
+    thread.topicSlug && thread.subtopicSlug ? "← Back to subtopic" : "← Community"
+
   return (
-    <main style={{ fontFamily: "sans-serif", maxWidth: "800px", margin: "0 auto", padding: "20px" }}>
-
-      {/* Breadcrumb */}
-      <div style={{ marginBottom: "24px" }}>
-        <a href="/" style={{ color: "#888", textDecoration: "none", fontSize: "14px" }}>Home</a>
-        <span style={{ color: "#888", margin: "0 6px" }}>→</span>
-        <a href="/community" style={{ color: "#888", textDecoration: "none", fontSize: "14px" }}>Community</a>
-      </div>
-
-      {/* Original Post */}
-      <div style={{ border: "1px solid #eee", borderRadius: "10px", padding: "24px", marginBottom: "24px" }}>
-        <h1 style={{ fontSize: "24px", fontWeight: "bold", margin: "0 0 16px 0" }}>{thread.title}</h1>
-        <p style={{ fontSize: "15px", lineHeight: "1.6", margin: "0 0 16px 0" }}>{thread.body}</p>
-        <div style={{ fontSize: "13px", color: "#888" }}>
-          Posted by user{thread.authorId} · {new Date(thread.createdAt).toLocaleDateString()}
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#f26b1d",
+        padding: "28px 20px 40px",
+        fontFamily: "var(--font-body, Inter, system-ui, sans-serif)",
+      }}
+    >
+      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+        <div style={{ marginBottom: "20px" }}>
+          <Link
+            href={backHref}
+            style={{
+              color: "#111",
+              textDecoration: "none",
+              fontSize: "14px",
+              fontWeight: 600,
+            }}
+          >
+            {backLabel}
+          </Link>
         </div>
-      </div>
 
-      {/* Replies */}
-      <h2 style={{ fontSize: "18px", fontWeight: "600", marginBottom: "16px" }}>
-        {replies.length} Replies
-      </h2>
-
-      {replies.map((reply) => (
         <div
-          key={reply.id}
-          style={{ border: "1px solid #eee", borderRadius: "10px", padding: "16px", marginBottom: "12px" }}
+          style={{
+            background: "#0b0f19",
+            border: "1px solid #9e8e84",
+            borderRadius: "28px",
+            padding: "26px 24px",
+            marginBottom: "22px",
+            boxShadow: "0 10px 28px rgba(0,0,0,0.25)",
+          }}
         >
-          <div style={{ fontSize: "13px", color: "#888", marginBottom: "8px" }}>
-            user{reply.authorId} · {new Date(reply.createdAt).toLocaleDateString()}
+          <div
+            style={{
+              color: "#fff",
+              fontSize: "24px",
+              fontWeight: 800,
+              marginBottom: "12px",
+              lineHeight: 1.3,
+            }}
+          >
+            {thread.title}
           </div>
-          <p style={{ fontSize: "15px", lineHeight: "1.6", margin: 0 }}>{reply.body}</p>
+
+          <div
+            style={{
+              color: "#d8dde6",
+              fontSize: "16px",
+              lineHeight: 1.6,
+              marginBottom: "14px",
+              whiteSpace: "pre-wrap",
+            }}
+          >
+            {thread.body}
+          </div>
+
+          <div style={{ color: "#aeb4bf", fontSize: "13px" }}>
+            @{thread.username} • {thread.replyCount} replies •{" "}
+            {thread.createdAt ? new Date(thread.createdAt).toLocaleString() : ""}
+          </div>
         </div>
-      ))}
 
-      {/* Reply Box */}
-      <div style={{ border: "1px solid #eee", borderRadius: "10px", padding: "16px", marginTop: "24px" }}>
-        <h3 style={{ fontSize: "16px", fontWeight: "600", margin: "0 0 12px 0" }}>Leave a Reply</h3>
-        <textarea
-          placeholder="Write your reply..."
-          style={{
-            width: "100%",
-            minHeight: "100px",
-            padding: "10px",
-            borderRadius: "8px",
-            border: "1px solid #ddd",
-            fontSize: "14px",
-            fontFamily: "sans-serif",
-            resize: "vertical",
-            boxSizing: "border-box"
-          }}
-        />
-        <button
-          style={{
-            marginTop: "10px",
-            padding: "10px 20px",
-            background: "#0070f3",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            fontSize: "14px",
-            cursor: "pointer"
-          }}
-        >
-          Post Reply
-        </button>
+        <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+          {replies.map((reply) => (
+            <div
+              key={reply.id}
+              style={{
+                background: "#0b0f19",
+                border: "1px solid #9e8e84",
+                borderRadius: "24px",
+                padding: "18px 20px",
+                boxShadow: "0 6px 18px rgba(0,0,0,0.2)",
+              }}
+            >
+              <div style={{ color: "#aeb4bf", fontSize: "13px", marginBottom: "6px" }}>
+                @{reply.username} • {reply.createdAt ? new Date(reply.createdAt).toLocaleString() : ""}
+              </div>
+              <div style={{ color: "#fff", fontSize: "15px", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+                {reply.body}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <ReplyBox threadId={id} />
       </div>
-
     </main>
   )
 }

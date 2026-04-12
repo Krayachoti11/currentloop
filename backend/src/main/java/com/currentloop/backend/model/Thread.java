@@ -17,7 +17,7 @@ public class Thread {
     @Column(name = "author_id")
     private Long authorId;
 
-    @Column(name = "subtopic_id")
+    @Column(name = "subtopic_id", nullable = true)
     private Long subtopicId;
 
     @Column(name = "reply_count")

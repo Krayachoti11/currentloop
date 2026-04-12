@@ -1,8 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import { apiUrl } from "@/lib/api"
 
 export default function LoginPage() {
+  const [sessionCheck, setSessionCheck] = useState(true)
   const [isLogin, setIsLogin] = useState(true)
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
@@ -10,17 +13,26 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && localStorage.getItem("token")) {
+      window.location.href = "/"
+      return
+    }
+    setSessionCheck(false)
+  }, [])
+
+  if (sessionCheck) {
+    return (
+      <main style={{ minHeight: "100vh", background: "#0b0f19" }} />
+    )
+  }
+
   async function handleSubmit() {
     setLoading(true)
     setError("")
 
-    const url = isLogin
-      ? "http://localhost:8080/api/auth/login"
-      : "http://localhost:8080/api/auth/register"
-
-    const body = isLogin
-      ? { username, password }
-      : { username, email, password }
+    const url = isLogin ? apiUrl("/api/auth/login") : apiUrl("/api/auth/register")
+    const body = isLogin ? { username, password } : { username, email, password }
 
     const res = await fetch(url, {
       method: "POST",
@@ -41,91 +53,154 @@ export default function LoginPage() {
   }
 
   return (
-    <main style={{ fontFamily: "sans-serif", maxWidth: "400px", margin: "80px auto", padding: "20px" }}>
-
-      <div style={{ textAlign: "center", marginBottom: "32px" }}>
-        <a href="/" style={{ textDecoration: "none", color: "inherit" }}>
-          <h1 style={{ fontSize: "28px", fontWeight: "bold", margin: 0 }}>CurrentLoop</h1>
-        </a>
-        <p style={{ color: "#888", marginTop: "8px" }}>
-          {isLogin ? "Welcome back" : "Create your account"}
-        </p>
-      </div>
-
-      <div style={{ border: "1px solid #eee", borderRadius: "12px", padding: "24px" }}>
-
-        <div style={{ display: "flex", marginBottom: "24px", borderRadius: "8px", overflow: "hidden", border: "1px solid #eee" }}>
-          <button
-            onClick={() => setIsLogin(true)}
-            style={{
-              flex: 1, padding: "10px", border: "none", cursor: "pointer",
-              background: isLogin ? "#0070f3" : "transparent",
-              color: isLogin ? "white" : "#888",
-              fontWeight: "600", fontSize: "14px"
-            }}
-          >
-            Login
-          </button>
-          <button
-            onClick={() => setIsLogin(false)}
-            style={{
-              flex: 1, padding: "10px", border: "none", cursor: "pointer",
-              background: !isLogin ? "#0070f3" : "transparent",
-              color: !isLogin ? "white" : "#888",
-              fontWeight: "600", fontSize: "14px"
-            }}
-          >
-            Sign Up
-          </button>
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#0b0f19",
+        padding: "48px 20px 60px",
+        fontFamily: "var(--font-body, system-ui, sans-serif)",
+      }}
+    >
+      <div style={{ maxWidth: "420px", margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: "28px" }}>
+          <Link href="/" style={{ textDecoration: "none", color: "#fff" }}>
+            <h1 style={{ fontSize: "30px", fontWeight: 800, margin: 0, letterSpacing: "-0.02em" }}>CurrentLoop</h1>
+          </Link>
+          <p style={{ color: "#b7bcc6", marginTop: "10px", fontSize: "15px" }}>
+            {isLogin ? "Welcome back" : "Create your account"}
+          </p>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <input
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            style={{ padding: "10px 12px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "14px" }}
-          />
+        <div
+          style={{
+            border: "1px solid #9e8e84",
+            borderRadius: "28px",
+            padding: "28px 24px",
+            background: "#111827",
+            boxShadow: "0 12px 32px rgba(0,0,0,0.35)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              marginBottom: "24px",
+              borderRadius: "999px",
+              overflow: "hidden",
+              border: "1px solid #2a3142",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setIsLogin(true)}
+              style={{
+                flex: 1,
+                padding: "10px",
+                border: "none",
+                cursor: "pointer",
+                background: isLogin ? "#f26b1d" : "transparent",
+                color: isLogin ? "#111" : "#aeb4bf",
+                fontWeight: 700,
+                fontSize: "14px",
+              }}
+            >
+              Login
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsLogin(false)}
+              style={{
+                flex: 1,
+                padding: "10px",
+                border: "none",
+                cursor: "pointer",
+                background: !isLogin ? "#f26b1d" : "transparent",
+                color: !isLogin ? "#111" : "#aeb4bf",
+                fontWeight: 700,
+                fontSize: "14px",
+              }}
+            >
+              Sign Up
+            </button>
+          </div>
 
-          {!isLogin && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             <input
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={{ padding: "10px 12px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "14px" }}
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              style={{
+                padding: "12px 14px",
+                borderRadius: "16px",
+                border: "1px solid #9e8e84",
+                fontSize: "15px",
+                background: "#0b0f19",
+                color: "#fff",
+                outline: "none",
+              }}
             />
-          )}
 
-          <input
-            placeholder="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ padding: "10px 12px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "14px" }}
-          />
+            {!isLogin ? (
+              <input
+                placeholder="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  padding: "12px 14px",
+                  borderRadius: "16px",
+                  border: "1px solid #9e8e84",
+                  fontSize: "15px",
+                  background: "#0b0f19",
+                  color: "#fff",
+                  outline: "none",
+                }}
+              />
+            ) : null}
 
-          {error && (
-            <div style={{ color: "red", fontSize: "13px" }}>{error}</div>
-          )}
+            <input
+              placeholder="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{
+                padding: "12px 14px",
+                borderRadius: "16px",
+                border: "1px solid #9e8e84",
+                fontSize: "15px",
+                background: "#0b0f19",
+                color: "#fff",
+                outline: "none",
+              }}
+            />
 
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            style={{
-              padding: "12px",
-              background: "#0070f3",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              fontSize: "15px",
-              fontWeight: "600",
-              cursor: "pointer",
-              marginTop: "4px"
-            }}
-          >
-            {loading ? "Please wait..." : isLogin ? "Login" : "Create Account"}
-          </button>
+            {error ? <div style={{ color: "#fecaca", fontSize: "14px" }}>{error}</div> : null}
+
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={loading}
+              style={{
+                padding: "12px",
+                background: "#f26b1d",
+                color: "#111",
+                border: "none",
+                borderRadius: "999px",
+                fontSize: "15px",
+                fontWeight: 700,
+                cursor: "pointer",
+                marginTop: "4px",
+              }}
+            >
+              {loading ? "Please wait…" : isLogin ? "Login" : "Create Account"}
+            </button>
+          </div>
         </div>
+
+        <p style={{ textAlign: "center", marginTop: "20px", fontSize: "14px" }}>
+          <Link href="/" style={{ color: "#f26b1d", textDecoration: "none", fontWeight: 600 }}>
+            ← Back to home
+          </Link>
+        </p>
       </div>
     </main>
   )

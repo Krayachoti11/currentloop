@@ -5,12 +5,13 @@ import com.currentloop.backend.repository.UserRepository;
 import com.currentloop.backend.security.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
     private final UserRepository userRepository;
@@ -29,18 +30,30 @@ public class AuthController {
         String email = body.get("email");
         String password = body.get("password");
 
-        if (userRepository.findByUsername(username).isPresent()) {
+        if (username == null || username.isBlank()) {
+            return Map.of("error", "Username is required");
+        }
+        if (email == null || email.isBlank()) {
+            return Map.of("error", "Email is required");
+        }
+        if (password == null || password.length() < 6) {
+            return Map.of("error", "Password must be at least 6 characters");
+        }
+
+        if (userRepository.findByUsername(username.trim()).isPresent()) {
             return Map.of("error", "Username already taken");
         }
 
         User user = new User();
-        user.setUsername(username);
-        user.setEmail(email);
+        user.setUsername(username.trim());
+        user.setEmail(email.trim());
         user.setPasswordHash(passwordEncoder.encode(password));
+        user.setCreatedAt(LocalDateTime.now());
+        user.setAdmin(false);
         userRepository.save(user);
 
-        String token = jwtUtil.generateToken(username);
-        return Map.of("token", token, "username", username);
+        String token = jwtUtil.generateToken(user.getUsername());
+        return Map.of("token", token, "username", user.getUsername());
     }
 
     @PostMapping("/login")
@@ -48,13 +61,18 @@ public class AuthController {
         String username = body.get("username");
         String password = body.get("password");
 
-        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (username == null || username.isBlank() || password == null) {
+            return Map.of("error", "Invalid username or password");
+        }
+
+        Optional<User> userOpt = userRepository.findByUsername(username.trim());
 
         if (userOpt.isEmpty() || !passwordEncoder.matches(password, userOpt.get().getPasswordHash())) {
             return Map.of("error", "Invalid username or password");
         }
 
-        String token = jwtUtil.generateToken(username);
-        return Map.of("token", token, "username", username);
+        String name = userOpt.get().getUsername();
+        String token = jwtUtil.generateToken(name);
+        return Map.of("token", token, "username", name);
     }
 }
