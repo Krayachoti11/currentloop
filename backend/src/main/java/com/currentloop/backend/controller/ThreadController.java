@@ -107,7 +107,7 @@ public class ThreadController {
 
         String username;
         try {
-            username = jwtUtil.get(token);
+            username = jwtUtil.extractUsername(token);
         } catch (Exception e) {
             return Map.of("error", "Not logged in");
         }
