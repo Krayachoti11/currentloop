@@ -43,16 +43,33 @@ export default function NewThreadForm() {
     setError("")
 
     try {
+      
+
+      const token = localStorage.getItem("token")
+
       const res = await fetch(apiUrl("/api/threads"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, body, token, subtopicSlug }),
+        headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+        title,
+        content: body,
+        subtopicSlug,
+      }),
       })
+        
+      let data
+      try {
+        data = await res.json()
+      } catch {
+        data = {}
+      }
 
-      const data = await res.json()
       setLoading(false)
 
-      if (!res.ok || data.error) {
+      if (!response.ok || data.error) {
         setError(data.error || "Failed to create thread")
         return
       }
