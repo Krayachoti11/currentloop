@@ -2,12 +2,17 @@ import Link from "next/link"
 import { briefsData } from "../data/briefsData"
 
 export default function BriefsPage() {
+  function formatDate(value) {
+    const date = new Date(value)
+    return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleDateString()
+  }
+
   return (
     <main
       style={{
         minHeight: "100vh",
         background: "#0b0f19",
-        padding: "28px 20px 40px 20px",
+        padding: "32px 20px 44px",
         fontFamily: "Inter, sans-serif",
       }}
     >
@@ -27,7 +32,7 @@ export default function BriefsPage() {
           </Link>
         </div>
 
-        <div style={{ marginBottom: "28px" }}>
+        <div style={{ marginBottom: "30px" }}>
           <p
             style={{
               margin: "0 0 8px 0",
@@ -65,7 +70,7 @@ export default function BriefsPage() {
           </p>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {briefsData.map((brief) => (
             <Link
               key={brief.id}
@@ -76,7 +81,7 @@ export default function BriefsPage() {
                 color: "inherit",
                 background: "#111827",
                 border: "1px solid #9e8e84",
-                borderRadius: "28px",
+                borderRadius: "24px",
                 padding: "22px 24px",
                 boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
               }}
@@ -89,7 +94,7 @@ export default function BriefsPage() {
                   marginBottom: "12px",
                 }}
               >
-                {brief.tags.map((tag) => (
+                {(brief.tags || []).map((tag) => (
                   <span
                     key={tag}
                     style={{
@@ -141,11 +146,11 @@ export default function BriefsPage() {
                   flexWrap: "wrap",
                 }}
               >
-                <span>{brief.topic}</span>
+                <span>{brief.topic || "general"}</span>
                 <span>•</span>
-                <span>{brief.subtopic}</span>
+                <span>{brief.subtopic || "general-discussion"}</span>
                 <span>•</span>
-                <span>{new Date(brief.updatedAt).toLocaleDateString()}</span>
+                <span>{formatDate(brief.updatedAt)}</span>
               </div>
             </Link>
           ))}

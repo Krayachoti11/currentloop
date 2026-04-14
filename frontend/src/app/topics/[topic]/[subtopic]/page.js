@@ -26,7 +26,7 @@ export default async function SubtopicPage(props) {
       style={{
         minHeight: "100vh",
         background: "#f26b1d",
-        padding: "28px 20px 40px",
+        padding: "32px 20px 42px",
         fontFamily: "var(--font-body, Inter, system-ui, sans-serif)",
       }}
     >
@@ -99,7 +99,7 @@ export default async function SubtopicPage(props) {
               background: "#0b0f19",
               color: "#fff",
               textDecoration: "none",
-              padding: "12px 20px",
+              padding: "11px 20px",
               borderRadius: "999px",
               fontSize: "14px",
               fontWeight: 700,
@@ -120,7 +120,7 @@ export default async function SubtopicPage(props) {
               background: "#0b0f19",
               color: "#fff",
               border: "1px solid #9e8e84",
-              borderRadius: "28px",
+              borderRadius: "24px",
               padding: "32px 26px",
             }}
           >
@@ -135,6 +135,7 @@ export default async function SubtopicPage(props) {
                 color: "#111",
                 textDecoration: "none",
                 padding: "10px 18px",
+                border: "1px solid #f2e9e4",
                 borderRadius: "999px",
                 fontSize: "14px",
                 fontWeight: 700,
@@ -156,7 +157,7 @@ export default async function SubtopicPage(props) {
                   color: "inherit",
                   background: "#0b0f19",
                   border: "1px solid #9e8e84",
-                  borderRadius: "28px",
+                  borderRadius: "24px",
                   padding: "20px 22px",
                   boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
                 }}
