@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { briefsData } from "../../data/briefsData"
 
 export default async function BriefDetailPage(props) {
@@ -24,10 +25,24 @@ export default async function BriefDetailPage(props) {
     )
   }
 
-  const discussionTitle = encodeURIComponent(brief.title)
-  const discussionBody = encodeURIComponent(
-    `${brief.summary}\n\nKey Points:\n- ${brief.points.join("\n- ")}`
-  )
+  const safeSubtopic = (brief.discussionSubtopic || brief.subtopic || "").trim()
+  const safeTitle = (brief.title || "Start a discussion").trim()
+  const safeSummary = (brief.summary || "").trim()
+  const safePoints = Array.isArray(brief.points) ? brief.points.filter(Boolean) : []
+
+  const discussionBody =
+    safePoints.length > 0
+      ? `${safeSummary}
+
+Key Points:
+- ${safePoints.join("\n- ")}`.trim()
+      : safeSummary
+
+  const discussionHref = `/thread/new?${new URLSearchParams({
+    subtopic: safeSubtopic,
+    title: safeTitle,
+    body: discussionBody,
+  }).toString()}`
 
   return (
     <main
@@ -40,7 +55,7 @@ export default async function BriefDetailPage(props) {
     >
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
         <div style={{ marginBottom: "24px" }}>
-          <a
+          <Link
             href="/briefs"
             style={{
               color: "#fff",
@@ -51,7 +66,7 @@ export default async function BriefDetailPage(props) {
             }}
           >
             ← Back to Briefs
-          </a>
+          </Link>
         </div>
 
         <div
@@ -123,8 +138,8 @@ export default async function BriefDetailPage(props) {
             {brief.summary}
           </div>
 
-          <a
-            href={`/thread/new?subtopic=${encodeURIComponent(brief.discussionSubtopic)}&title=${discussionTitle}&body=${discussionBody}`}
+          <Link
+            href={discussionHref}
             style={{
               background: "#f26b1d",
               color: "#111",
@@ -137,7 +152,7 @@ export default async function BriefDetailPage(props) {
             }}
           >
             Start Discussion
-          </a>
+          </Link>
         </div>
 
         <div
