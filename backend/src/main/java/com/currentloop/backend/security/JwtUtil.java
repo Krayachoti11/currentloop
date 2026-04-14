@@ -33,10 +33,13 @@ public class JwtUtil {
     }
 
     public String extractUsername(String token) {
+        if (token == null || token.isBlank()) {
+            throw new IllegalArgumentException("Token cannot be blank");
+        }
         return Jwts.parser()
                 .verifyWith(key)
                 .build()
-                .parseSignedClaims(token)
+                .parseSignedClaims(token.trim())
                 .getPayload()
                 .getSubject();
     }
@@ -45,7 +48,7 @@ public class JwtUtil {
         try {
             extractUsername(token);
             return true;
-        } catch (JwtException e) {
+        } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }

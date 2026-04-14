@@ -17,7 +17,8 @@ export default function NewThreadForm({ initialTitle = "", initialBody = "", ini
   useEffect(() => {
     const token = getStoredToken()
     if (!token) {
-      window.location.href = "/login"
+      const next = `${window.location.pathname}${window.location.search}`
+      window.location.href = `/login?next=${encodeURIComponent(next)}`
     }
   }, [])
 
@@ -30,6 +31,8 @@ export default function NewThreadForm({ initialTitle = "", initialBody = "", ini
     const token = getStoredToken()
     if (!token) {
       window.location.href = "/login"
+      const next = `${window.location.pathname}${window.location.search}`
+      window.location.href = `/login?next=${encodeURIComponent(next)}`
       return
     }
 
@@ -47,6 +50,7 @@ export default function NewThreadForm({ initialTitle = "", initialBody = "", ini
           title,
           content: body,
           subtopicSlug: subtopicSlug || undefined,
+          subtopicSlug,
         }),
       })
 

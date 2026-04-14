@@ -12,18 +12,45 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
+  function getNextPath() {
+    if (typeof window === "undefined") return "/"
+    const params = new URLSearchParams(window.location.search)
+    const next = params.get("next")
+    return next && next.startsWith("/") ? next : "/"
+  }
+
   useEffect(() => {
     if (typeof window !== "undefined" && localStorage.getItem("token")) {
       window.location.href = "/"
+    if (typeof window === "undefined") return
+
+    const safeNext = getNextPath()
+    if (localStorage.getItem("token")) {
+      window.location.href = safeNext
     }
   }, [])
 
   async function handleSubmit() {
+    const cleanUsername = username.trim()
+    const cleanEmail = email.trim()
+
+    if (!cleanUsername || !password) {
+      setError("Username and password are required")
+      return
+    }
+    if (!isLogin && !cleanEmail) {
+      setError("Email is required")
+      return
+    }
+
     setLoading(true)
     setError("")
 
     const url = isLogin ? apiUrl("/api/auth/login") : apiUrl("/api/auth/register")
     const body = isLogin ? { username, password } : { username, email, password }
+    const body = isLogin
+      ? { username: cleanUsername, password }
+      : { username: cleanUsername, email: cleanEmail, password }
 
     try {
       const res = await fetch(url, {
@@ -43,6 +70,18 @@ export default function LoginPage() {
       localStorage.setItem("token", data.token)
       localStorage.setItem("username", data.username || username)
       window.location.href = "/"
+      const parsed = await readJsonSafely(res)
+      const data = parsed && typeof parsed === "object" ? parsed : {}
+      setLoading(false)
+
+      if (!res.ok || data.error || !data.token) {
+        setError(data.error || "Authentication failed")
+        return
+      }
+
+      localStorage.setItem("token", data.token)
+      localStorage.setItem("username", data.username || cleanUsername)
+      window.location.href = getNextPath()
     } catch {
       setLoading(false)
       setError("Unable to reach server")
@@ -54,7 +93,7 @@ export default function LoginPage() {
       style={{
         minHeight: "100vh",
         background: "#0b0f19",
-        padding: "48px 20px 60px",
+        padding: "56px 20px 60px",
         fontFamily: "var(--font-body, system-ui, sans-serif)",
       }}
     >
@@ -71,7 +110,7 @@ export default function LoginPage() {
         <div
           style={{
             border: "1px solid #9e8e84",
-            borderRadius: "28px",
+            borderRadius: "26px",
             padding: "28px 24px",
             background: "#111827",
             boxShadow: "0 12px 32px rgba(0,0,0,0.35)",
@@ -127,7 +166,7 @@ export default function LoginPage() {
               onChange={(e) => setUsername(e.target.value)}
               style={{
                 padding: "12px 14px",
-                borderRadius: "16px",
+                borderRadius: "14px",
                 border: "1px solid #9e8e84",
                 fontSize: "15px",
                 background: "#0b0f19",
@@ -144,7 +183,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 style={{
                   padding: "12px 14px",
-                  borderRadius: "16px",
+                  borderRadius: "14px",
                   border: "1px solid #9e8e84",
                   fontSize: "15px",
                   background: "#0b0f19",
@@ -161,7 +200,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               style={{
                 padding: "12px 14px",
-                borderRadius: "16px",
+                borderRadius: "14px",
                 border: "1px solid #9e8e84",
                 fontSize: "15px",
                 background: "#0b0f19",
@@ -179,10 +218,11 @@ export default function LoginPage() {
               style={{
                 padding: "12px",
                 background: "#f26b1d",
+                border: "1px solid #f26b1d",
                 color: "#111",
-                border: "none",
+                boxShadow: "0 8px 20px rgba(242,107,29,0.25)",
                 borderRadius: "999px",
-                fontSize: "15px",
+                fontSize: "14px",
                 fontWeight: 700,
                 cursor: "pointer",
                 marginTop: "4px",

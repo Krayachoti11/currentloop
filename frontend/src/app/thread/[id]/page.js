@@ -35,8 +35,20 @@ export default async function ThreadPage(props) {
 
   if (!thread) {
     return (
-      <main style={{ padding: "40px", background: "#f26b1d", minHeight: "100vh", color: "#111" }}>
-        Thread not found
+      <main style={{ padding: "40px 20px", background: "#f26b1d", minHeight: "100vh", color: "#111" }}>
+        <div
+          style={{
+            maxWidth: "900px",
+            margin: "0 auto",
+            background: "#0b0f19",
+            border: "1px solid #9e8e84",
+            borderRadius: "22px",
+            padding: "18px 20px",
+            color: "#b7bcc6",
+          }}
+        >
+          Thread not found.
+        </div>
       </main>
     )
   }
@@ -54,7 +66,7 @@ export default async function ThreadPage(props) {
       style={{
         minHeight: "100vh",
         background: "#f26b1d",
-        padding: "28px 20px 40px",
+        padding: "32px 20px 42px",
         fontFamily: "var(--font-body, Inter, system-ui, sans-serif)",
       }}
     >
@@ -77,7 +89,7 @@ export default async function ThreadPage(props) {
           style={{
             background: "#0b0f19",
             border: "1px solid #9e8e84",
-            borderRadius: "28px",
+            borderRadius: "24px",
             padding: "26px 24px",
             marginBottom: "22px",
             boxShadow: "0 10px 28px rgba(0,0,0,0.25)",
@@ -113,16 +125,15 @@ export default async function ThreadPage(props) {
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-          {replies.map((reply) => (
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          {replies.length === 0 ? (
             <div
-              key={reply.id}
               style={{
                 background: "#0b0f19",
                 border: "1px solid #9e8e84",
-                borderRadius: "24px",
-                padding: "18px 20px",
-                boxShadow: "0 6px 18px rgba(0,0,0,0.2)",
+                borderRadius: "22px",
+                padding: "16px 18px",
+                color: "#b7bcc6",
               }}
             >
               <div style={{ color: "#aeb4bf", fontSize: "13px", marginBottom: "6px" }}>
@@ -131,8 +142,29 @@ export default async function ThreadPage(props) {
               <div style={{ color: "#fff", fontSize: "15px", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
                 {reply.body}
               </div>
+              No replies yet — be the first to contribute.
             </div>
-          ))}
+          ) : (
+            replies.map((reply) => (
+              <div
+                key={reply.id}
+                style={{
+                  background: "#0b0f19",
+                  border: "1px solid #9e8e84",
+                  borderRadius: "22px",
+                  padding: "18px 20px",
+                  boxShadow: "0 6px 18px rgba(0,0,0,0.2)",
+                }}
+              >
+                <div style={{ color: "#aeb4bf", fontSize: "13px", marginBottom: "6px" }}>
+                  @{reply.username || "deleted-user"} • {reply.createdAt ? new Date(reply.createdAt).toLocaleString() : ""}
+                </div>
+                <div style={{ color: "#fff", fontSize: "15px", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+                  {reply.body}
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         <ReplyBox threadId={id} />

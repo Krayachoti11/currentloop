@@ -58,6 +58,10 @@ public class ReplyController {
 
             return replyMap;
         }).toList();
+        return replyRepository.findByThreadIdOrderByCreatedAtAsc(threadId)
+                .stream()
+                .map(this::toReplyResponse)
+                .toList();
     }
 
     @PostMapping("/{threadId}/replies")
@@ -66,6 +70,12 @@ public class ReplyController {
             @RequestBody Map<String, String> body,
             @RequestHeader(value = "Authorization", required = false) String authHeader
     ) {
+            @RequestBody(required = false) Map<String, String> body,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        if (body == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid request body"));
+        }
         String replyBody = body.get("body");
 
         if (replyBody == null || replyBody.isBlank()) {
@@ -102,6 +112,7 @@ public class ReplyController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Map.of("id", reply.getId(), "body", reply.getBody(), "username", username, "threadId", threadId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(toReplyResponse(reply));
     }
 
     private String extractBearerToken(String authHeader) {
@@ -109,5 +120,23 @@ public class ReplyController {
             return null;
         }
         return authHeader.substring(7).trim();
+    }
+
+    private Map<String, Object> toReplyResponse(Reply reply) {
+        Map<String, Object> replyMap = new HashMap<>();
+        replyMap.put("id", reply.getId());
+        replyMap.put("body", reply.getBody());
+        replyMap.put("authorId", reply.getAuthorId());
+        replyMap.put("threadId", reply.getThreadId());
+        replyMap.put("createdAt", reply.getCreatedAt());
+
+        String username = "deleted-user";
+        if (reply.getAuthorId() != null) {
+            username = userRepository.findById(reply.getAuthorId())
+                    .map(User::getUsername)
+                    .orElse("deleted-user");
+        }
+        replyMap.put("username", username);
+        return replyMap;
     }
 }

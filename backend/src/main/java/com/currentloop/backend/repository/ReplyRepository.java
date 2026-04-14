@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ReplyRepository extends JpaRepository<Reply, Long> {
     List<Reply> findByThreadId(Long threadId);
+    List<Reply> findByThreadIdOrderByCreatedAtAsc(Long threadId);
 }

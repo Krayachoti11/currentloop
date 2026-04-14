@@ -1,11 +1,12 @@
 import Link from "next/link"
 import { briefsData } from "../../data/briefsData"
+import { getBriefById } from "../../data/briefsData"
 
 export default async function BriefDetailPage(props) {
   const params = await props.params
   const id = params.id
 
-  const brief = briefsData.find((item) => item.id === id)
+  const brief = getBriefById(id)
 
   if (!brief) {
     return (
@@ -43,13 +44,23 @@ Key Points:
     title: safeTitle,
     body: discussionBody,
   }).toString()}`
+  const discussionTitle = encodeURIComponent(brief.title)
+  const discussionBody = encodeURIComponent(
+    `${brief.summary}\n\nKey Points:\n- ${(brief.points || []).join("\n- ")}`
+  )
+  const safeDiscussionSubtopic = brief.discussionSubtopic || brief.subtopic || "general-discussion"
+
+  function formatDateTime(value) {
+    const date = new Date(value)
+    return Number.isNaN(date.getTime()) ? "Unknown update time" : date.toLocaleString()
+  }
 
   return (
     <main
       style={{
         minHeight: "100vh",
         background: "#0b0f19",
-        padding: "28px 20px 40px 20px",
+        padding: "32px 20px 44px",
         fontFamily: "Inter, sans-serif",
       }}
     >
@@ -73,7 +84,7 @@ Key Points:
           style={{
             background: "#111827",
             border: "1px solid #9e8e84",
-            borderRadius: "28px",
+            borderRadius: "24px",
             padding: "28px 28px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
             marginBottom: "22px",
@@ -87,7 +98,7 @@ Key Points:
               marginBottom: "14px",
             }}
           >
-            {brief.tags.map((tag) => (
+            {(brief.tags || []).map((tag) => (
               <span
                 key={tag}
                 style={{
@@ -124,7 +135,7 @@ Key Points:
               marginBottom: "20px",
             }}
           >
-            Updated {new Date(brief.updatedAt).toLocaleString()}
+            Updated {formatDateTime(brief.updatedAt)}
           </div>
 
           <div
@@ -140,14 +151,18 @@ Key Points:
 
           <Link
             href={discussionHref}
+          <a
+            href={`/thread/new?subtopic=${encodeURIComponent(safeDiscussionSubtopic)}&title=${discussionTitle}&body=${discussionBody}`}
             style={{
               background: "#f26b1d",
               color: "#111",
               textDecoration: "none",
-              padding: "12px 20px",
+              padding: "11px 20px",
+              border: "1px solid #f26b1d",
               borderRadius: "999px",
               fontSize: "14px",
               fontWeight: "800",
+              boxShadow: "0 8px 20px rgba(242,107,29,0.25)",
               display: "inline-block",
             }}
           >
@@ -159,7 +174,7 @@ Key Points:
           style={{
             background: "#111827",
             border: "1px solid #9e8e84",
-            borderRadius: "28px",
+            borderRadius: "24px",
             padding: "24px 24px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
             marginBottom: "22px",
@@ -177,13 +192,13 @@ Key Points:
           </h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {brief.points.map((point, index) => (
+            {(brief.points || []).map((point, index) => (
               <div
                 key={index}
                 style={{
                   background: "#0b0f19",
                   border: "1px solid #9e8e84",
-                  borderRadius: "22px",
+                  borderRadius: "20px",
                   padding: "16px 18px",
                   color: "#d8dde6",
                   fontSize: "15px",
@@ -200,7 +215,7 @@ Key Points:
           style={{
             background: "#111827",
             border: "1px solid #9e8e84",
-            borderRadius: "28px",
+            borderRadius: "24px",
             padding: "24px 24px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
           }}
@@ -217,16 +232,16 @@ Key Points:
           </h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {brief.sourceLinks.map((source, index) => (
+            {(brief.sourceLinks || []).map((source, index) => (
               <a
                 key={index}
-                href={source.url}
+                href={source.url || "#"}
                 target="_blank"
                 rel="noreferrer"
                 style={{
                   background: "#0b0f19",
                   border: "1px solid #9e8e84",
-                  borderRadius: "22px",
+                  borderRadius: "20px",
                   padding: "16px 18px",
                   color: "#fff",
                   textDecoration: "none",
@@ -234,7 +249,7 @@ Key Points:
                   fontWeight: "700",
                 }}
               >
-                {source.label}
+                {source.label || `Source ${index + 1}`}
               </a>
             ))}
           </div>
