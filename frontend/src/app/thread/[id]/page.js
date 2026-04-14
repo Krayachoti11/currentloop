@@ -1,12 +1,14 @@
 import Link from "next/link"
 import ReplyBox from "./ReplyBox"
-import { apiUrl } from "@/lib/api"
+import { apiUrl, readJsonSafely } from "@/lib/api"
 
 async function getThread(id) {
   try {
     const res = await fetch(apiUrl(`/api/threads/${id}`), { cache: "no-store" })
     if (!res.ok) return null
-    return res.json()
+
+    const data = await readJsonSafely(res)
+    return data && typeof data === "object" ? data : null
   } catch {
     return null
   }
@@ -16,7 +18,9 @@ async function getReplies(id) {
   try {
     const res = await fetch(apiUrl(`/api/threads/${id}/replies`), { cache: "no-store" })
     if (!res.ok) return []
-    return res.json()
+
+    const data = await readJsonSafely(res)
+    return Array.isArray(data) ? data : []
   } catch {
     return []
   }
@@ -104,7 +108,7 @@ export default async function ThreadPage(props) {
           </div>
 
           <div style={{ color: "#aeb4bf", fontSize: "13px" }}>
-            @{thread.username} • {thread.replyCount} replies •{" "}
+            @{thread.username || "deleted-user"} • {thread.replyCount || 0} replies •{" "}
             {thread.createdAt ? new Date(thread.createdAt).toLocaleString() : ""}
           </div>
         </div>
@@ -122,7 +126,7 @@ export default async function ThreadPage(props) {
               }}
             >
               <div style={{ color: "#aeb4bf", fontSize: "13px", marginBottom: "6px" }}>
-                @{reply.username} • {reply.createdAt ? new Date(reply.createdAt).toLocaleString() : ""}
+                @{reply.username || "deleted-user"} • {reply.createdAt ? new Date(reply.createdAt).toLocaleString() : ""}
               </div>
               <div style={{ color: "#fff", fontSize: "15px", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
                 {reply.body}

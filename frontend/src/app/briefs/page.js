@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { briefsData } from "../data/briefsData"
 
 export default function BriefsPage() {
@@ -12,7 +13,7 @@ export default function BriefsPage() {
     >
       <div style={{ maxWidth: "980px", margin: "0 auto" }}>
         <div style={{ marginBottom: "24px" }}>
-          <a
+          <Link
             href="/"
             style={{
               color: "#fff",
@@ -23,7 +24,7 @@ export default function BriefsPage() {
             }}
           >
             ← Back
-          </a>
+          </Link>
         </div>
 
         <div style={{ marginBottom: "28px" }}>
@@ -66,7 +67,7 @@ export default function BriefsPage() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
           {briefsData.map((brief) => (
-            <a
+            <Link
               key={brief.id}
               href={`/briefs/${brief.id}`}
               style={{
@@ -146,7 +147,7 @@ export default function BriefsPage() {
                 <span>•</span>
                 <span>{new Date(brief.updatedAt).toLocaleDateString()}</span>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

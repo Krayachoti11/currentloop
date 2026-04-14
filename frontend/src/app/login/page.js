@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { apiUrl } from "@/lib/api"
+import { apiUrl, readJsonSafely } from "@/lib/api"
 
 export default function LoginPage() {
-  const [sessionCheck, setSessionCheck] = useState(true)
   const [isLogin, setIsLogin] = useState(true)
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
@@ -16,16 +15,8 @@ export default function LoginPage() {
   useEffect(() => {
     if (typeof window !== "undefined" && localStorage.getItem("token")) {
       window.location.href = "/"
-      return
     }
-    setSessionCheck(false)
   }, [])
-
-  if (sessionCheck) {
-    return (
-      <main style={{ minHeight: "100vh", background: "#0b0f19" }} />
-    )
-  }
 
   async function handleSubmit() {
     setLoading(true)
@@ -34,21 +25,27 @@ export default function LoginPage() {
     const url = isLogin ? apiUrl("/api/auth/login") : apiUrl("/api/auth/register")
     const body = isLogin ? { username, password } : { username, email, password }
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    })
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
 
-    const data = await res.json()
-    setLoading(false)
+      const data = (await readJsonSafely(res)) || {}
+      setLoading(false)
 
-    if (data.error) {
-      setError(data.error)
-    } else {
+      if (!res.ok || data.error || !data.token) {
+        setError(data.error || "Authentication failed")
+        return
+      }
+
       localStorage.setItem("token", data.token)
-      localStorage.setItem("username", data.username)
+      localStorage.setItem("username", data.username || username)
       window.location.href = "/"
+    } catch {
+      setLoading(false)
+      setError("Unable to reach server")
     }
   }
 
