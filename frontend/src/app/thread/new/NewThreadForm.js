@@ -1,20 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { apiUrl, getStoredToken, readJsonSafely } from "@/lib/api"
 
-export default function NewThreadForm() {
+export default function NewThreadForm({ initialTitle = "", initialBody = "", initialSubtopicSlug = "" }) {
   const router = useRouter()
-  const searchParams = useSearchParams()
-
-  const subtopicSlug = searchParams.get("subtopic")
-  const initialTitle = searchParams.get("title") || ""
-  const initialBody = searchParams.get("body") || ""
 
   const [title, setTitle] = useState(initialTitle)
   const [body, setBody] = useState(initialBody)
+  const [subtopicSlug] = useState(initialSubtopicSlug)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -52,6 +48,7 @@ export default function NewThreadForm() {
         body: JSON.stringify({
           title,
           content: body,
+          subtopicSlug: subtopicSlug || undefined,
           subtopicSlug,
         }),
       })

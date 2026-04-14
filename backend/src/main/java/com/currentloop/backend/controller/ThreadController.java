@@ -61,6 +61,14 @@ public class ThreadController {
         String content = body.getOrDefault("content", body.get("body"));
         String subtopicSlug = body.get("subtopicSlug");
 
+        if (body == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid request body"));
+        }
+
+        String title = body.get("title");
+        String content = body.getOrDefault("content", body.get("body"));
+        String subtopicSlug = body.get("subtopicSlug");
+
         if (title == null || title.isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Title is required"));
         }
