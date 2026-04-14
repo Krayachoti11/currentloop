@@ -7,5 +7,7 @@ import java.util.List;
 
 public interface ThreadRepository extends JpaRepository<Thread, Long> {
     List<Thread> findBySubtopicId(Long subtopicId);
+    List<Thread> findBySubtopicIdOrderByCreatedAtDesc(Long subtopicId);
     List<Thread> findByAuthorId(Long authorId);
+    List<Thread> findByAuthorIdOrderByCreatedAtDesc(Long authorId);
 }
