@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { apiUrl } from "@/lib/api"
+import { apiUrl, getStoredToken, readJsonSafely } from "@/lib/api"
 
 export default function NewThreadForm() {
   const router = useRouter()
@@ -19,54 +19,42 @@ export default function NewThreadForm() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    const token = localStorage.getItem("token")
+    const token = getStoredToken()
     if (!token) {
       window.location.href = "/login"
     }
   }, [])
 
-  useEffect(() => {
-    const t = searchParams.get("title")
-    const b = searchParams.get("body")
-    if (t != null && t !== "") setTitle(t)
-    if (b != null && b !== "") setBody(b)
-  }, [searchParams])
-
   async function handleSubmit() {
     if (!title.trim() || !body.trim()) {
-      setError("Title and body are required")
+      setError("Title and content are required")
       return
     }
 
-    const token = localStorage.getItem("token")
+    const token = getStoredToken()
+    if (!token) {
+      window.location.href = "/login"
+      return
+    }
+
     setLoading(true)
     setError("")
 
     try {
-      
-
-      const token = localStorage.getItem("token")
-
       const res = await fetch(apiUrl("/api/threads"), {
         method: "POST",
         headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-        title,
-        content: body,
-        subtopicSlug,
-      }),
+          title,
+          content: body,
+          subtopicSlug,
+        }),
       })
-        
-      let data
-      try {
-        data = await res.json()
-      } catch {
-        data = {}
-      }
 
+      const data = (await readJsonSafely(res)) || {}
       setLoading(false)
 
       if (!res.ok || data.error) {
@@ -74,12 +62,12 @@ export default function NewThreadForm() {
         return
       }
 
-      if (!data.id) {
-        setError("Thread created but no id returned")
+      if (!data.id || typeof data.id !== "number") {
+        setError("Thread created but no valid id returned")
         return
       }
 
-      router.push("/thread/" + data.id)
+      router.push(`/thread/${data.id}`)
     } catch (err) {
       console.error(err)
       setLoading(false)

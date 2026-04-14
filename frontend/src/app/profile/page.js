@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { apiUrl } from "@/lib/api"
+import { apiUrl, readJsonSafely } from "@/lib/api"
 
 export default function ProfilePage() {
   const [threads, setThreads] = useState([])
-  const [username, setUsername] = useState("")
+  const [username] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("username") || "" : ""))
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -17,15 +17,18 @@ export default function ProfilePage() {
       return
     }
 
-    setUsername(storedUsername)
-
     fetch(apiUrl(`/api/users/${encodeURIComponent(storedUsername)}/threads`))
-      .then((res) => res.json())
-      .then((data) => {
-        setThreads(Array.isArray(data) ? data : [])
+      .then(async (res) => {
+        if (!res.ok) return []
+        const data = await readJsonSafely(res)
+        return Array.isArray(data) ? data : []
+      })
+      .then((rows) => {
+        setThreads(rows)
         setLoading(false)
       })
       .catch(() => {
+        setThreads([])
         setLoading(false)
       })
   }, [])
@@ -134,7 +137,7 @@ export default function ProfilePage() {
                   </div>
                 ) : null}
                 <div style={{ color: "#aeb4bf", fontSize: "13px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                  <span>{thread.replyCount} replies</span>
+                  <span>{thread.replyCount || 0} replies</span>
                   <span>•</span>
                   <span>{thread.createdAt ? new Date(thread.createdAt).toLocaleDateString() : ""}</span>
                 </div>

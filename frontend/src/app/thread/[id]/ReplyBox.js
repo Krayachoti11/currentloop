@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { apiUrl } from "@/lib/api"
+import { apiUrl, getStoredToken, readJsonSafely } from "@/lib/api"
 
 export default function ReplyBox({ threadId }) {
   const [body, setBody] = useState("")
@@ -14,7 +14,7 @@ export default function ReplyBox({ threadId }) {
       return
     }
 
-    const token = localStorage.getItem("token")
+    const token = getStoredToken()
     if (!token) {
       window.location.href = "/login"
       return
@@ -26,11 +26,14 @@ export default function ReplyBox({ threadId }) {
     try {
       const res = await fetch(apiUrl(`/api/threads/${threadId}/replies`), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body, token }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ body }),
       })
 
-      const data = await res.json()
+      const data = (await readJsonSafely(res)) || {}
       setLoading(false)
 
       if (!res.ok || data.error) {

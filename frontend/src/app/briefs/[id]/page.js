@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { briefsData } from "../../data/briefsData"
 
 export default async function BriefDetailPage(props) {
@@ -40,7 +41,7 @@ export default async function BriefDetailPage(props) {
     >
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
         <div style={{ marginBottom: "24px" }}>
-          <a
+          <Link
             href="/briefs"
             style={{
               color: "#fff",
@@ -51,7 +52,7 @@ export default async function BriefDetailPage(props) {
             }}
           >
             ← Back to Briefs
-          </a>
+          </Link>
         </div>
 
         <div
