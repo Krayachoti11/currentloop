@@ -27,7 +27,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> register(@RequestBody(required = false) Map<String, String> body) {
+    public ResponseEntity<Map<String, Object>> register(@RequestBody(required = false) Map<String, String> body) {
         if (body == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid request body"));
         }
@@ -64,12 +64,13 @@ public class AuthController {
         user.setAdmin(false);
         userRepository.save(user);
 
-        String token = jwtUtil.generateToken(user.getUsername());
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("token", token, "username", user.getUsername()));
+        String token = jwtUtil.generateToken(user.getUsername(), user.isAdmin());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Map.of("token", token, "username", user.getUsername(), "isAdmin", user.isAdmin()));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody(required = false) Map<String, String> body) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody(required = false) Map<String, String> body) {
         if (body == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid request body"));
         }
@@ -88,6 +89,37 @@ public class AuthController {
         }
 
         String name = userOpt.get().getUsername();
+        boolean isAdmin = userOpt.get().isAdmin();
+        String token = jwtUtil.generateToken(name, isAdmin);
+        return ResponseEntity.ok(Map.of("token", token, "username", name, "isAdmin", isAdmin));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<Map<String, Object>> me(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        String token = extractBearerToken(authHeader);
+        if (token == null || !jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Not logged in"));
+        }
+
+        String username = jwtUtil.extractUsername(token);
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "User not found"));
+        }
+
+        User user = userOpt.get();
+        return ResponseEntity.ok(Map.of(
+                "id", user.getId(),
+                "username", user.getUsername(),
+                "isAdmin", user.isAdmin()
+        ));
+    }
+
+    private String extractBearerToken(String authHeader) {
+        if (authHeader == null || authHeader.isBlank() || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+        return authHeader.substring(7).trim();
         String token = jwtUtil.generateToken(name);
         return ResponseEntity.ok(Map.of("token", token, "username", name));
     }

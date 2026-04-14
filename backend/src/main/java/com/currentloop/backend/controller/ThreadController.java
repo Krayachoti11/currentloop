@@ -1,9 +1,11 @@
 package com.currentloop.backend.controller;
 
 import com.currentloop.backend.model.Subtopic;
+import com.currentloop.backend.model.SuspiciousActivityFlag;
 import com.currentloop.backend.model.Thread;
 import com.currentloop.backend.model.Topic;
 import com.currentloop.backend.model.User;
+import com.currentloop.backend.repository.SuspiciousActivityFlagRepository;
 import com.currentloop.backend.repository.SubtopicRepository;
 import com.currentloop.backend.repository.ThreadRepository;
 import com.currentloop.backend.repository.TopicRepository;
@@ -26,17 +28,20 @@ public class ThreadController {
     private final UserRepository userRepository;
     private final SubtopicRepository subtopicRepository;
     private final TopicRepository topicRepository;
+    private final SuspiciousActivityFlagRepository suspiciousActivityFlagRepository;
     private final JwtUtil jwtUtil;
 
     public ThreadController(ThreadRepository threadRepository,
                             UserRepository userRepository,
                             SubtopicRepository subtopicRepository,
                             TopicRepository topicRepository,
+                            SuspiciousActivityFlagRepository suspiciousActivityFlagRepository,
                             JwtUtil jwtUtil) {
         this.threadRepository = threadRepository;
         this.userRepository = userRepository;
         this.subtopicRepository = subtopicRepository;
         this.topicRepository = topicRepository;
+        this.suspiciousActivityFlagRepository = suspiciousActivityFlagRepository;
         this.jwtUtil = jwtUtil;
     }
 
@@ -93,6 +98,7 @@ public class ThreadController {
         }
 
         Thread saved = threadRepository.save(thread);
+        createThreadFlagsIfNeeded(saved);
         return ResponseEntity.status(HttpStatus.CREATED).body(toThreadResponse(saved));
     }
 
@@ -145,5 +151,48 @@ public class ThreadController {
         }
 
         return data;
+    }
+
+    private void createThreadFlagsIfNeeded(Thread thread) {
+        if (thread.getAuthorId() == null || thread.getCreatedAt() == null) {
+            return;
+        }
+
+        LocalDateTime now = thread.getCreatedAt();
+        Long userId = thread.getAuthorId();
+
+        long recentThreadCount = threadRepository.countByAuthorIdAndCreatedAtAfter(userId, now.minusMinutes(5));
+        if (recentThreadCount >= 5) {
+            saveFlagIfNotRecent(userId, "THREAD_RATE_SPIKE",
+                    "User posted " + recentThreadCount + " threads within 5 minutes.");
+        }
+
+        long repeatedThreadCount = threadRepository.countByAuthorIdAndTitleAndBodyAndCreatedAtAfter(
+                userId,
+                thread.getTitle(),
+                thread.getBody(),
+                now.minusMinutes(30)
+        );
+        if (repeatedThreadCount >= 3) {
+            saveFlagIfNotRecent(userId, "REPEATED_THREAD_CONTENT",
+                    "User posted near-identical thread content " + repeatedThreadCount + " times within 30 minutes.");
+        }
+    }
+
+    private void saveFlagIfNotRecent(Long userId, String type, String message) {
+        LocalDateTime dedupeWindowStart = LocalDateTime.now().minusMinutes(15);
+        boolean alreadyFlagged = suspiciousActivityFlagRepository
+                .existsByUserIdAndTypeAndCreatedAtAfter(userId, type, dedupeWindowStart);
+        if (alreadyFlagged) {
+            return;
+        }
+
+        SuspiciousActivityFlag flag = new SuspiciousActivityFlag();
+        flag.setUserId(userId);
+        flag.setType(type);
+        flag.setMessage(message);
+        flag.setCreatedAt(LocalDateTime.now());
+        flag.setResolved(false);
+        suspiciousActivityFlagRepository.save(flag);
     }
 }

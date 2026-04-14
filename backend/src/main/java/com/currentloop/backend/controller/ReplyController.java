@@ -1,9 +1,11 @@
 package com.currentloop.backend.controller;
 
 import com.currentloop.backend.model.Reply;
+import com.currentloop.backend.model.SuspiciousActivityFlag;
 import com.currentloop.backend.model.Thread;
 import com.currentloop.backend.model.User;
 import com.currentloop.backend.repository.ReplyRepository;
+import com.currentloop.backend.repository.SuspiciousActivityFlagRepository;
 import com.currentloop.backend.repository.ThreadRepository;
 import com.currentloop.backend.repository.UserRepository;
 import com.currentloop.backend.security.JwtUtil;
@@ -24,17 +26,20 @@ public class ReplyController {
     private final ReplyRepository replyRepository;
     private final ThreadRepository threadRepository;
     private final UserRepository userRepository;
+    private final SuspiciousActivityFlagRepository suspiciousActivityFlagRepository;
     private final JwtUtil jwtUtil;
 
     public ReplyController(
             ReplyRepository replyRepository,
             ThreadRepository threadRepository,
             UserRepository userRepository,
+            SuspiciousActivityFlagRepository suspiciousActivityFlagRepository,
             JwtUtil jwtUtil
     ) {
         this.replyRepository = replyRepository;
         this.threadRepository = threadRepository;
         this.userRepository = userRepository;
+        this.suspiciousActivityFlagRepository = suspiciousActivityFlagRepository;
         this.jwtUtil = jwtUtil;
     }
 
@@ -109,6 +114,7 @@ public class ReplyController {
         reply.setAuthorId(userOpt.get().getId());
         reply.setCreatedAt(LocalDateTime.now());
         reply = replyRepository.save(reply);
+        createReplyFlagsIfNeeded(reply);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Map.of("id", reply.getId(), "body", reply.getBody(), "username", username, "threadId", threadId));
@@ -138,5 +144,47 @@ public class ReplyController {
         }
         replyMap.put("username", username);
         return replyMap;
+    }
+
+    private void createReplyFlagsIfNeeded(Reply reply) {
+        if (reply.getAuthorId() == null || reply.getCreatedAt() == null) {
+            return;
+        }
+
+        LocalDateTime now = reply.getCreatedAt();
+        Long userId = reply.getAuthorId();
+
+        long recentReplyCount = replyRepository.countByAuthorIdAndCreatedAtAfter(userId, now.minusMinutes(2));
+        if (recentReplyCount >= 10) {
+            saveFlagIfNotRecent(userId, "REPLY_RATE_SPIKE",
+                    "User posted " + recentReplyCount + " replies within 2 minutes.");
+        }
+
+        long repeatedReplyCount = replyRepository.countByAuthorIdAndBodyAndCreatedAtAfter(
+                userId,
+                reply.getBody(),
+                now.minusMinutes(15)
+        );
+        if (repeatedReplyCount >= 4) {
+            saveFlagIfNotRecent(userId, "REPEATED_REPLY_CONTENT",
+                    "User posted identical reply content " + repeatedReplyCount + " times within 15 minutes.");
+        }
+    }
+
+    private void saveFlagIfNotRecent(Long userId, String type, String message) {
+        LocalDateTime dedupeWindowStart = LocalDateTime.now().minusMinutes(15);
+        boolean alreadyFlagged = suspiciousActivityFlagRepository
+                .existsByUserIdAndTypeAndCreatedAtAfter(userId, type, dedupeWindowStart);
+        if (alreadyFlagged) {
+            return;
+        }
+
+        SuspiciousActivityFlag flag = new SuspiciousActivityFlag();
+        flag.setUserId(userId);
+        flag.setType(type);
+        flag.setMessage(message);
+        flag.setCreatedAt(LocalDateTime.now());
+        flag.setResolved(false);
+        suspiciousActivityFlagRepository.save(flag);
     }
 }

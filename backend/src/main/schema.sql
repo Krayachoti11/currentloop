@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    is_admin BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- Topics table
@@ -49,4 +50,14 @@ CREATE TABLE IF NOT EXISTS replies (
     author_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
     thread_id INTEGER REFERENCES threads(id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Suspicious activity flags (manual/admin review foundation)
+CREATE TABLE IF NOT EXISTS suspicious_activity_flags (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type VARCHAR(80) NOT NULL,
+    message VARCHAR(500) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    resolved BOOLEAN NOT NULL DEFAULT FALSE
 );

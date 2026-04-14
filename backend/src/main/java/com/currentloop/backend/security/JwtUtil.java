@@ -24,8 +24,13 @@ public class JwtUtil {
     }
 
     public String generateToken(String username) {
+        return generateToken(username, false);
+    }
+
+    public String generateToken(String username, boolean isAdmin) {
         return Jwts.builder()
                 .subject(username)
+                .claim("isAdmin", isAdmin)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_MS))
                 .signWith(key)
@@ -48,6 +53,23 @@ public class JwtUtil {
         try {
             extractUsername(token);
             return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public boolean extractIsAdmin(String token) {
+        if (token == null || token.isBlank()) {
+            return false;
+        }
+        try {
+            Object value = Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token.trim())
+                    .getPayload()
+                    .get("isAdmin");
+            return value instanceof Boolean && (Boolean) value;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
