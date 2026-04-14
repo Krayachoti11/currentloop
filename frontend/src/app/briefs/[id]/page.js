@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { briefsData } from "../../data/briefsData"
 import { getBriefById } from "../../data/briefsData"
 
 export default async function BriefDetailPage(props) {
@@ -25,6 +26,24 @@ export default async function BriefDetailPage(props) {
     )
   }
 
+  const safeSubtopic = (brief.discussionSubtopic || brief.subtopic || "").trim()
+  const safeTitle = (brief.title || "Start a discussion").trim()
+  const safeSummary = (brief.summary || "").trim()
+  const safePoints = Array.isArray(brief.points) ? brief.points.filter(Boolean) : []
+
+  const discussionBody =
+    safePoints.length > 0
+      ? `${safeSummary}
+
+Key Points:
+- ${safePoints.join("\n- ")}`.trim()
+      : safeSummary
+
+  const discussionHref = `/thread/new?${new URLSearchParams({
+    subtopic: safeSubtopic,
+    title: safeTitle,
+    body: discussionBody,
+  }).toString()}`
   const discussionTitle = encodeURIComponent(brief.title)
   const discussionBody = encodeURIComponent(
     `${brief.summary}\n\nKey Points:\n- ${(brief.points || []).join("\n- ")}`
@@ -130,6 +149,8 @@ export default async function BriefDetailPage(props) {
             {brief.summary}
           </div>
 
+          <Link
+            href={discussionHref}
           <a
             href={`/thread/new?subtopic=${encodeURIComponent(safeDiscussionSubtopic)}&title=${discussionTitle}&body=${discussionBody}`}
             style={{
@@ -146,7 +167,7 @@ export default async function BriefDetailPage(props) {
             }}
           >
             Start Discussion
-          </a>
+          </Link>
         </div>
 
         <div

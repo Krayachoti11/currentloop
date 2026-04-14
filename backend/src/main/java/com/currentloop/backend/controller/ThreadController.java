@@ -41,6 +41,7 @@ public class ThreadController {
     }
 
     @PostMapping
+    public ResponseEntity<?> createThread(@RequestBody Map<String, String> body,
     public ResponseEntity<?> createThread(@RequestBody(required = false) Map<String, String> body,
                                           @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
@@ -48,6 +49,11 @@ public class ThreadController {
         if (token == null || !jwtUtil.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Not logged in"));
         }
+
+        String title = body.get("title");
+        String content = body.getOrDefault("content", body.get("body"));
+        String subtopicSlug = body.get("subtopicSlug");
+
         if (body == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid request body"));
         }
@@ -77,6 +83,8 @@ public class ThreadController {
         thread.setReplyCount(0);
 
         if (subtopicSlug != null && !subtopicSlug.isBlank()) {
+            subtopicRepository.findBySlug(subtopicSlug.trim())
+                    .ifPresent(subtopic -> thread.setSubtopicId(subtopic.getId()));
             Optional<Subtopic> subtopicOpt = subtopicRepository.findBySlug(subtopicSlug.trim());
             if (subtopicOpt.isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Invalid subtopic"));
