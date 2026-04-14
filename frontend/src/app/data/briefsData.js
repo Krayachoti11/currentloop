@@ -1,4 +1,4 @@
-export const briefsData = [
+const rawBriefsData = [
   {
     id: "barca-transfer-window",
     topic: "sports",
@@ -64,3 +64,67 @@ export const briefsData = [
     discussionSubtopic: "india"
   }
 ]
+
+function toArray(value) {
+  return Array.isArray(value) ? value : []
+}
+
+function toSafeString(value, fallback = "") {
+  return typeof value === "string" && value.trim() ? value.trim() : fallback
+}
+
+function toSlug(value, fallback = "general-discussion") {
+  const base = toSafeString(value, fallback).toLowerCase()
+  return base
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || fallback
+}
+
+function normalizeSource(source, index) {
+  if (!source || typeof source !== "object") {
+    return { label: `Source ${index + 1}`, url: "#" }
+  }
+
+  const label = toSafeString(source.label, `Source ${index + 1}`)
+  const url = toSafeString(source.url, "#")
+  return { label, url }
+}
+
+function normalizeBrief(raw, index) {
+  const topic = toSlug(raw?.topic, "general")
+  const subtopic = toSlug(raw?.subtopic, "general-discussion")
+  const id = toSlug(raw?.id || raw?.slug || `${topic}-${subtopic}-${index + 1}`)
+
+  const pointsInput = toArray(raw?.points).length ? raw.points : toArray(raw?.keyPoints)
+  const points = pointsInput
+    .map((point) => toSafeString(point))
+    .filter(Boolean)
+
+  const sourceInput = toArray(raw?.sourceLinks).length ? raw.sourceLinks : toArray(raw?.sources)
+  const sourceLinks = sourceInput.map(normalizeSource)
+
+  const tags = toArray(raw?.tags).map((tag) => toSafeString(tag)).filter(Boolean)
+  const updatedAt = toSafeString(raw?.updatedAt, new Date(0).toISOString())
+  const discussionSubtopic = toSlug(raw?.discussionSubtopic || subtopic, subtopic)
+
+  return {
+    id,
+    topic,
+    subtopic,
+    title: toSafeString(raw?.title, "Untitled brief"),
+    summary: toSafeString(raw?.summary, "No summary is available yet."),
+    points: points.length ? points : ["No key points available yet."],
+    tags: tags.length ? tags : ["Brief"],
+    updatedAt,
+    sourceLinks: sourceLinks.length ? sourceLinks : [{ label: "Source", url: "#" }],
+    discussionSubtopic,
+  }
+}
+
+export const briefsData = rawBriefsData.map(normalizeBrief)
+
+export function getBriefById(id) {
+  const normalizedId = toSlug(id || "")
+  return briefsData.find((brief) => brief.id === normalizedId) || null
+}
