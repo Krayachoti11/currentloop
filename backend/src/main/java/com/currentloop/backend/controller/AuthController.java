@@ -120,5 +120,7 @@ public class AuthController {
             return null;
         }
         return authHeader.substring(7).trim();
+        String token = jwtUtil.generateToken(name);
+        return ResponseEntity.ok(Map.of("token", token, "username", name));
     }
 }
