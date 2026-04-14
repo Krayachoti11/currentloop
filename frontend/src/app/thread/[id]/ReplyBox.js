@@ -16,7 +16,8 @@ export default function ReplyBox({ threadId }) {
 
     const token = getStoredToken()
     if (!token) {
-      window.location.href = "/login"
+      const next = `${window.location.pathname}${window.location.search}`
+      window.location.href = `/login?next=${encodeURIComponent(next)}`
       return
     }
 

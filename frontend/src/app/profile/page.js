@@ -13,7 +13,8 @@ export default function ProfilePage() {
     const storedUsername = localStorage.getItem("username")
 
     if (!storedUsername) {
-      window.location.href = "/login"
+      const next = `${window.location.pathname}${window.location.search}`
+      window.location.href = `/login?next=${encodeURIComponent(next)}`
       return
     }
 

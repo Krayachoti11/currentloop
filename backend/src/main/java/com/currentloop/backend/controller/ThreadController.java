@@ -74,8 +74,11 @@ public class ThreadController {
         thread.setReplyCount(0);
 
         if (subtopicSlug != null && !subtopicSlug.isBlank()) {
-            subtopicRepository.findBySlug(subtopicSlug.trim())
-                    .ifPresent(subtopic -> thread.setSubtopicId(subtopic.getId()));
+            Optional<Subtopic> subtopicOpt = subtopicRepository.findBySlug(subtopicSlug.trim());
+            if (subtopicOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid subtopic"));
+            }
+            thread.setSubtopicId(subtopicOpt.get().getId());
         }
 
         Thread saved = threadRepository.save(thread);

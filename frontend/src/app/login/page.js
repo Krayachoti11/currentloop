@@ -12,9 +12,19 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
+  function getNextPath() {
+    if (typeof window === "undefined") return "/"
+    const params = new URLSearchParams(window.location.search)
+    const next = params.get("next")
+    return next && next.startsWith("/") ? next : "/"
+  }
+
   useEffect(() => {
-    if (typeof window !== "undefined" && localStorage.getItem("token")) {
-      window.location.href = "/"
+    if (typeof window === "undefined") return
+
+    const safeNext = getNextPath()
+    if (localStorage.getItem("token")) {
+      window.location.href = safeNext
     }
   }, [])
 
@@ -42,7 +52,7 @@ export default function LoginPage() {
 
       localStorage.setItem("token", data.token)
       localStorage.setItem("username", data.username || username)
-      window.location.href = "/"
+      window.location.href = getNextPath()
     } catch {
       setLoading(false)
       setError("Unable to reach server")
