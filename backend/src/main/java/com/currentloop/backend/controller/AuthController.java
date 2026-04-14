@@ -77,8 +77,8 @@ public class AuthController {
         String username = body.get("username");
         String password = body.get("password");
 
-        if (username == null || username.isBlank() || password == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid username or password"));
+        if (username == null || username.isBlank() || password == null || password.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Username and password are required"));
         }
 
         Optional<User> userOpt = userRepository.findByUsername(username.trim());

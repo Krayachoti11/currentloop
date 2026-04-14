@@ -41,12 +41,15 @@ public class ThreadController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createThread(@RequestBody Map<String, String> body,
+    public ResponseEntity<?> createThread(@RequestBody(required = false) Map<String, String> body,
                                           @RequestHeader(value = "Authorization", required = false) String authHeader) {
 
         String token = extractBearerToken(authHeader);
         if (token == null || !jwtUtil.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Not logged in"));
+        }
+        if (body == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid request body"));
         }
 
         String title = body.get("title");
@@ -107,6 +110,7 @@ public class ThreadController {
         data.put("id", thread.getId());
         data.put("title", thread.getTitle());
         data.put("body", thread.getBody());
+        data.put("content", thread.getBody());
         data.put("authorId", thread.getAuthorId());
         data.put("replyCount", thread.getReplyCount() == null ? 0 : thread.getReplyCount());
         data.put("createdAt", thread.getCreatedAt());
