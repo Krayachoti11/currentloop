@@ -28,6 +28,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@RequestBody(required = false) Map<String, String> body) {
+    public ResponseEntity<Map<String, String>> register(@RequestBody(required = false) Map<String, String> body) {
         if (body == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid request body"));
         }
@@ -71,6 +72,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody(required = false) Map<String, String> body) {
+        String token = jwtUtil.generateToken(user.getUsername());
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("token", token, "username", user.getUsername()));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, String>> login(@RequestBody(required = false) Map<String, String> body) {
         if (body == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid request body"));
         }
@@ -120,5 +127,7 @@ public class AuthController {
             return null;
         }
         return authHeader.substring(7).trim();
+        String token = jwtUtil.generateToken(name);
+        return ResponseEntity.ok(Map.of("token", token, "username", name));
     }
 }
