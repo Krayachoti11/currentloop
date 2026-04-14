@@ -20,6 +20,8 @@ export default function LoginPage() {
   }
 
   useEffect(() => {
+    if (typeof window !== "undefined" && localStorage.getItem("token")) {
+      window.location.href = "/"
     if (typeof window === "undefined") return
 
     const safeNext = getNextPath()
@@ -45,6 +47,7 @@ export default function LoginPage() {
     setError("")
 
     const url = isLogin ? apiUrl("/api/auth/login") : apiUrl("/api/auth/register")
+    const body = isLogin ? { username, password } : { username, email, password }
     const body = isLogin
       ? { username: cleanUsername, password }
       : { username: cleanUsername, email: cleanEmail, password }
@@ -56,6 +59,18 @@ export default function LoginPage() {
         body: JSON.stringify(body),
       })
 
+      const parsed = await readJsonSafely(res)
+      const data = parsed && typeof parsed === "object" ? parsed : {}
+      setLoading(false)
+
+      if (!res.ok || data.error || !data.token) {
+        setError(data.error || "Authentication failed")
+        return
+      }
+
+      localStorage.setItem("token", data.token)
+      localStorage.setItem("username", data.username || username)
+      window.location.href = "/"
       const parsed = await readJsonSafely(res)
       const data = parsed && typeof parsed === "object" ? parsed : {}
       setLoading(false)
