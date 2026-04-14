@@ -69,7 +69,7 @@ export default function NewThreadForm() {
 
       setLoading(false)
 
-      if (!response.ok || data.error) {
+      if (!res.ok || data.error) {
         setError(data.error || "Failed to create thread")
         return
       }
