@@ -7,7 +7,7 @@ export default function BriefsPage() {
       style={{
         minHeight: "100vh",
         background: "#0b0f19",
-        padding: "28px 20px 40px 20px",
+        padding: "32px 20px 44px",
         fontFamily: "Inter, sans-serif",
       }}
     >
@@ -27,7 +27,7 @@ export default function BriefsPage() {
           </Link>
         </div>
 
-        <div style={{ marginBottom: "28px" }}>
+        <div style={{ marginBottom: "30px" }}>
           <p
             style={{
               margin: "0 0 8px 0",
@@ -65,7 +65,7 @@ export default function BriefsPage() {
           </p>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {briefsData.map((brief) => (
             <Link
               key={brief.id}
@@ -76,7 +76,7 @@ export default function BriefsPage() {
                 color: "inherit",
                 background: "#111827",
                 border: "1px solid #9e8e84",
-                borderRadius: "28px",
+                borderRadius: "24px",
                 padding: "22px 24px",
                 boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
               }}

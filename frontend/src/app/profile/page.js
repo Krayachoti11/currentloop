@@ -39,7 +39,7 @@ export default function ProfilePage() {
       style={{
         minHeight: "100vh",
         background: "#0b0f19",
-        padding: "28px 20px 40px",
+        padding: "32px 20px 44px",
         fontFamily: "var(--font-body, system-ui, sans-serif)",
       }}
     >
@@ -63,7 +63,7 @@ export default function ProfilePage() {
           style={{
             background: "#111827",
             border: "1px solid #9e8e84",
-            borderRadius: "28px",
+            borderRadius: "26px",
             padding: "24px",
             marginBottom: "24px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
@@ -96,13 +96,13 @@ export default function ProfilePage() {
         <h2 style={{ color: "#fff", fontSize: "20px", fontWeight: 800, marginBottom: "16px" }}>Your threads</h2>
 
         {loading ? (
-          <div style={{ color: "#b7bcc6" }}>Loading…</div>
+          <div style={{ color: "#b7bcc6", background: "#111827", border: "1px solid #9e8e84", borderRadius: "22px", padding: "16px 18px" }}>Loading your threads…</div>
         ) : threads.length === 0 ? (
           <div
             style={{
               background: "#111827",
               border: "1px solid #9e8e84",
-              borderRadius: "24px",
+              borderRadius: "22px",
               padding: "24px",
               color: "#b7bcc6",
             }}
@@ -122,7 +122,7 @@ export default function ProfilePage() {
                   display: "block",
                   background: "#111827",
                   border: "1px solid #9e8e84",
-                  borderRadius: "24px",
+                  borderRadius: "22px",
                   padding: "18px 20px",
                   color: "#fff",
                   textDecoration: "none",

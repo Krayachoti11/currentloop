@@ -79,7 +79,7 @@ export default function LoginPage() {
       style={{
         minHeight: "100vh",
         background: "#0b0f19",
-        padding: "48px 20px 60px",
+        padding: "56px 20px 60px",
         fontFamily: "var(--font-body, system-ui, sans-serif)",
       }}
     >
@@ -96,7 +96,7 @@ export default function LoginPage() {
         <div
           style={{
             border: "1px solid #9e8e84",
-            borderRadius: "28px",
+            borderRadius: "26px",
             padding: "28px 24px",
             background: "#111827",
             boxShadow: "0 12px 32px rgba(0,0,0,0.35)",
@@ -152,7 +152,7 @@ export default function LoginPage() {
               onChange={(e) => setUsername(e.target.value)}
               style={{
                 padding: "12px 14px",
-                borderRadius: "16px",
+                borderRadius: "14px",
                 border: "1px solid #9e8e84",
                 fontSize: "15px",
                 background: "#0b0f19",
@@ -169,7 +169,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 style={{
                   padding: "12px 14px",
-                  borderRadius: "16px",
+                  borderRadius: "14px",
                   border: "1px solid #9e8e84",
                   fontSize: "15px",
                   background: "#0b0f19",
@@ -186,7 +186,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               style={{
                 padding: "12px 14px",
-                borderRadius: "16px",
+                borderRadius: "14px",
                 border: "1px solid #9e8e84",
                 fontSize: "15px",
                 background: "#0b0f19",
@@ -204,10 +204,11 @@ export default function LoginPage() {
               style={{
                 padding: "12px",
                 background: "#f26b1d",
+                border: "1px solid #f26b1d",
                 color: "#111",
-                border: "none",
+                boxShadow: "0 8px 20px rgba(242,107,29,0.25)",
                 borderRadius: "999px",
-                fontSize: "15px",
+                fontSize: "14px",
                 fontWeight: 700,
                 cursor: "pointer",
                 marginTop: "4px",

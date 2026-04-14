@@ -35,7 +35,7 @@ export default async function BriefDetailPage(props) {
       style={{
         minHeight: "100vh",
         background: "#0b0f19",
-        padding: "28px 20px 40px 20px",
+        padding: "32px 20px 44px",
         fontFamily: "Inter, sans-serif",
       }}
     >
@@ -59,7 +59,7 @@ export default async function BriefDetailPage(props) {
           style={{
             background: "#111827",
             border: "1px solid #9e8e84",
-            borderRadius: "28px",
+            borderRadius: "24px",
             padding: "28px 28px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
             marginBottom: "22px",
@@ -130,10 +130,12 @@ export default async function BriefDetailPage(props) {
               background: "#f26b1d",
               color: "#111",
               textDecoration: "none",
-              padding: "12px 20px",
+              padding: "11px 20px",
+              border: "1px solid #f26b1d",
               borderRadius: "999px",
               fontSize: "14px",
               fontWeight: "800",
+              boxShadow: "0 8px 20px rgba(242,107,29,0.25)",
               display: "inline-block",
             }}
           >
@@ -145,7 +147,7 @@ export default async function BriefDetailPage(props) {
           style={{
             background: "#111827",
             border: "1px solid #9e8e84",
-            borderRadius: "28px",
+            borderRadius: "24px",
             padding: "24px 24px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
             marginBottom: "22px",
@@ -169,7 +171,7 @@ export default async function BriefDetailPage(props) {
                 style={{
                   background: "#0b0f19",
                   border: "1px solid #9e8e84",
-                  borderRadius: "22px",
+                  borderRadius: "20px",
                   padding: "16px 18px",
                   color: "#d8dde6",
                   fontSize: "15px",
@@ -186,7 +188,7 @@ export default async function BriefDetailPage(props) {
           style={{
             background: "#111827",
             border: "1px solid #9e8e84",
-            borderRadius: "28px",
+            borderRadius: "24px",
             padding: "24px 24px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
           }}
@@ -212,7 +214,7 @@ export default async function BriefDetailPage(props) {
                 style={{
                   background: "#0b0f19",
                   border: "1px solid #9e8e84",
-                  borderRadius: "22px",
+                  borderRadius: "20px",
                   padding: "16px 18px",
                   color: "#fff",
                   textDecoration: "none",

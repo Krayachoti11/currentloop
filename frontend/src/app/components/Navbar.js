@@ -51,8 +51,8 @@ export default function Navbar() {
   return (
     <nav
       style={{
-        borderBottom: "1px solid #2a3142",
-        padding: "14px 24px",
+        borderBottom: "1px solid #9e8e84",
+        padding: "14px 20px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -63,11 +63,11 @@ export default function Navbar() {
         zIndex: 100,
       }}
     >
-      <Link href="/" style={{ textDecoration: "none", color: "#fff" }}>
+      <Link href="/" style={{ textDecoration: "none", color: "#fff", marginRight: "16px" }}>
         <span style={{ fontWeight: 800, fontSize: "20px", letterSpacing: "-0.02em" }}>CurrentLoop</span>
       </Link>
 
-      <div style={{ display: "flex", gap: "18px", alignItems: "center" }}>
+      <div style={{ display: "flex", gap: "16px", alignItems: "center", flex: 1, flexWrap: "wrap" }}>
         <Link href="/community" style={{ color: "#d8dde6", textDecoration: "none", fontSize: "14px", fontWeight: 600 }}>
           Community
         </Link>
@@ -95,6 +95,7 @@ export default function Navbar() {
                 borderRadius: "999px",
                 color: "#fff",
                 fontSize: "14px",
+                fontWeight: 700,
                 cursor: "pointer",
               }}
             >
@@ -107,6 +108,7 @@ export default function Navbar() {
             style={{
               padding: "8px 18px",
               background: "#f26b1d",
+              border: "1px solid #f26b1d",
               borderRadius: "999px",
               color: "#111",
               textDecoration: "none",
