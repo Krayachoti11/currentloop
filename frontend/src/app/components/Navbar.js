@@ -7,10 +7,36 @@ export default function Navbar() {
   const [username, setUsername] = useState(null)
 
   useEffect(() => {
-    function sync() {
-      const stored = localStorage.getItem("username")
-      setUsername(stored || null)
+    function getUsernameFromToken(token) {
+      if (!token) return null
+      try {
+        const payload = token.split(".")[1]
+        if (!payload) return null
+        const normalized = payload.replace(/-/g, "+").replace(/_/g, "/")
+        const decoded = JSON.parse(window.atob(normalized))
+        return typeof decoded?.sub === "string" && decoded.sub.trim() ? decoded.sub : null
+      } catch {
+        return null
+      }
     }
+
+    function sync() {
+      const token = localStorage.getItem("token")
+      const storedUsername = localStorage.getItem("username")
+
+      if (!token) {
+        setUsername(null)
+        return
+      }
+
+      const resolvedUsername = storedUsername || getUsernameFromToken(token)
+      setUsername(resolvedUsername || null)
+
+      if (!storedUsername && resolvedUsername) {
+        localStorage.setItem("username", resolvedUsername)
+      }
+    }
+
     sync()
     window.addEventListener("storage", sync)
     return () => window.removeEventListener("storage", sync)

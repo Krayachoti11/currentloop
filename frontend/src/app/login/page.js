@@ -29,11 +29,25 @@ export default function LoginPage() {
   }, [])
 
   async function handleSubmit() {
+    const cleanUsername = username.trim()
+    const cleanEmail = email.trim()
+
+    if (!cleanUsername || !password) {
+      setError("Username and password are required")
+      return
+    }
+    if (!isLogin && !cleanEmail) {
+      setError("Email is required")
+      return
+    }
+
     setLoading(true)
     setError("")
 
     const url = isLogin ? apiUrl("/api/auth/login") : apiUrl("/api/auth/register")
-    const body = isLogin ? { username, password } : { username, email, password }
+    const body = isLogin
+      ? { username: cleanUsername, password }
+      : { username: cleanUsername, email: cleanEmail, password }
 
     try {
       const res = await fetch(url, {
@@ -42,7 +56,8 @@ export default function LoginPage() {
         body: JSON.stringify(body),
       })
 
-      const data = (await readJsonSafely(res)) || {}
+      const parsed = await readJsonSafely(res)
+      const data = parsed && typeof parsed === "object" ? parsed : {}
       setLoading(false)
 
       if (!res.ok || data.error || !data.token) {
@@ -51,7 +66,7 @@ export default function LoginPage() {
       }
 
       localStorage.setItem("token", data.token)
-      localStorage.setItem("username", data.username || username)
+      localStorage.setItem("username", data.username || cleanUsername)
       window.location.href = getNextPath()
     } catch {
       setLoading(false)

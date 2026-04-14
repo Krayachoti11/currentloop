@@ -45,7 +45,7 @@ public class JwtUtil {
         try {
             extractUsername(token);
             return true;
-        } catch (JwtException e) {
+        } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
     }
