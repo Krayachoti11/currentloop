@@ -20,6 +20,16 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Build
+
+Run the production build from the `frontend` folder:
+
+```bash
+npm run build
+```
+
+If you are building from a monorepo/root CI step, make sure the working directory is set to `frontend`.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

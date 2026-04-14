@@ -21,7 +21,8 @@ export default function NewThreadForm() {
   useEffect(() => {
     const token = getStoredToken()
     if (!token) {
-      window.location.href = "/login"
+      const next = `${window.location.pathname}${window.location.search}`
+      window.location.href = `/login?next=${encodeURIComponent(next)}`
     }
   }, [])
 
@@ -33,7 +34,8 @@ export default function NewThreadForm() {
 
     const token = getStoredToken()
     if (!token) {
-      window.location.href = "/login"
+      const next = `${window.location.pathname}${window.location.search}`
+      window.location.href = `/login?next=${encodeURIComponent(next)}`
       return
     }
 

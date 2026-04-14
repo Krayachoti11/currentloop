@@ -1,0 +1,8 @@
+{
+  "name": "currentloop-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix frontend install --no-audit --no-fund && npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint"
+  }
+}
