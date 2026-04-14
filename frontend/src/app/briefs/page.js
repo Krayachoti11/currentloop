@@ -2,6 +2,11 @@ import Link from "next/link"
 import { briefsData } from "../data/briefsData"
 
 export default function BriefsPage() {
+  function formatDate(value) {
+    const date = new Date(value)
+    return Number.isNaN(date.getTime()) ? "Date unavailable" : date.toLocaleDateString()
+  }
+
   return (
     <main
       style={{
@@ -89,7 +94,7 @@ export default function BriefsPage() {
                   marginBottom: "12px",
                 }}
               >
-                {brief.tags.map((tag) => (
+                {(brief.tags || []).map((tag) => (
                   <span
                     key={tag}
                     style={{
@@ -141,11 +146,11 @@ export default function BriefsPage() {
                   flexWrap: "wrap",
                 }}
               >
-                <span>{brief.topic}</span>
+                <span>{brief.topic || "general"}</span>
                 <span>•</span>
-                <span>{brief.subtopic}</span>
+                <span>{brief.subtopic || "general-discussion"}</span>
                 <span>•</span>
-                <span>{new Date(brief.updatedAt).toLocaleDateString()}</span>
+                <span>{formatDate(brief.updatedAt)}</span>
               </div>
             </Link>
           ))}

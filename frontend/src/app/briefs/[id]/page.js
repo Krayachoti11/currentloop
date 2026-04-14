@@ -1,11 +1,11 @@
 import Link from "next/link"
-import { briefsData } from "../../data/briefsData"
+import { getBriefById } from "../../data/briefsData"
 
 export default async function BriefDetailPage(props) {
   const params = await props.params
   const id = params.id
 
-  const brief = briefsData.find((item) => item.id === id)
+  const brief = getBriefById(id)
 
   if (!brief) {
     return (
@@ -27,8 +27,14 @@ export default async function BriefDetailPage(props) {
 
   const discussionTitle = encodeURIComponent(brief.title)
   const discussionBody = encodeURIComponent(
-    `${brief.summary}\n\nKey Points:\n- ${brief.points.join("\n- ")}`
+    `${brief.summary}\n\nKey Points:\n- ${(brief.points || []).join("\n- ")}`
   )
+  const safeDiscussionSubtopic = brief.discussionSubtopic || brief.subtopic || "general-discussion"
+
+  function formatDateTime(value) {
+    const date = new Date(value)
+    return Number.isNaN(date.getTime()) ? "Unknown update time" : date.toLocaleString()
+  }
 
   return (
     <main
@@ -73,7 +79,7 @@ export default async function BriefDetailPage(props) {
               marginBottom: "14px",
             }}
           >
-            {brief.tags.map((tag) => (
+            {(brief.tags || []).map((tag) => (
               <span
                 key={tag}
                 style={{
@@ -110,7 +116,7 @@ export default async function BriefDetailPage(props) {
               marginBottom: "20px",
             }}
           >
-            Updated {new Date(brief.updatedAt).toLocaleString()}
+            Updated {formatDateTime(brief.updatedAt)}
           </div>
 
           <div
@@ -125,7 +131,7 @@ export default async function BriefDetailPage(props) {
           </div>
 
           <a
-            href={`/thread/new?subtopic=${encodeURIComponent(brief.discussionSubtopic)}&title=${discussionTitle}&body=${discussionBody}`}
+            href={`/thread/new?subtopic=${encodeURIComponent(safeDiscussionSubtopic)}&title=${discussionTitle}&body=${discussionBody}`}
             style={{
               background: "#f26b1d",
               color: "#111",
@@ -165,7 +171,7 @@ export default async function BriefDetailPage(props) {
           </h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {brief.points.map((point, index) => (
+            {(brief.points || []).map((point, index) => (
               <div
                 key={index}
                 style={{
@@ -205,10 +211,10 @@ export default async function BriefDetailPage(props) {
           </h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {brief.sourceLinks.map((source, index) => (
+            {(brief.sourceLinks || []).map((source, index) => (
               <a
                 key={index}
-                href={source.url}
+                href={source.url || "#"}
                 target="_blank"
                 rel="noreferrer"
                 style={{
@@ -222,7 +228,7 @@ export default async function BriefDetailPage(props) {
                   fontWeight: "700",
                 }}
               >
-                {source.label}
+                {source.label || `Source ${index + 1}`}
               </a>
             ))}
           </div>
