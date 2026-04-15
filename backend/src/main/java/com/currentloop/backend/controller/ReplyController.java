@@ -45,24 +45,6 @@ public class ReplyController {
 
     @GetMapping("/{threadId}/replies")
     public List<Map<String, Object>> getReplies(@PathVariable Long threadId) {
-        return replyRepository.findByThreadId(threadId).stream().map(reply -> {
-            Map<String, Object> replyMap = new HashMap<>();
-            replyMap.put("id", reply.getId());
-            replyMap.put("body", reply.getBody());
-            replyMap.put("authorId", reply.getAuthorId());
-            replyMap.put("threadId", reply.getThreadId());
-            replyMap.put("createdAt", reply.getCreatedAt());
-
-            String username = "deleted-user";
-            if (reply.getAuthorId() != null) {
-                username = userRepository.findById(reply.getAuthorId())
-                        .map(User::getUsername)
-                        .orElse("deleted-user");
-            }
-            replyMap.put("username", username);
-
-            return replyMap;
-        }).toList();
         return replyRepository.findByThreadIdOrderByCreatedAtAsc(threadId)
                 .stream()
                 .map(this::toReplyResponse)
@@ -72,17 +54,14 @@ public class ReplyController {
     @PostMapping("/{threadId}/replies")
     public ResponseEntity<?> createReply(
             @PathVariable Long threadId,
-            @RequestBody Map<String, String> body,
-            @RequestHeader(value = "Authorization", required = false) String authHeader
-    ) {
             @RequestBody(required = false) Map<String, String> body,
             @RequestHeader(value = "Authorization", required = false) String authHeader
     ) {
         if (body == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid request body"));
         }
-        String replyBody = body.get("body");
 
+        String replyBody = body.get("body");
         if (replyBody == null || replyBody.isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Reply cannot be empty"));
         }
@@ -113,12 +92,11 @@ public class ReplyController {
         reply.setThreadId(threadId);
         reply.setAuthorId(userOpt.get().getId());
         reply.setCreatedAt(LocalDateTime.now());
-        reply = replyRepository.save(reply);
-        createReplyFlagsIfNeeded(reply);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Map.of("id", reply.getId(), "body", reply.getBody(), "username", username, "threadId", threadId));
-        return ResponseEntity.status(HttpStatus.CREATED).body(toReplyResponse(reply));
+        Reply savedReply = replyRepository.save(reply);
+        createReplyFlagsIfNeeded(savedReply);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(toReplyResponse(savedReply));
     }
 
     private String extractBearerToken(String authHeader) {
@@ -143,6 +121,7 @@ public class ReplyController {
                     .orElse("deleted-user");
         }
         replyMap.put("username", username);
+
         return replyMap;
     }
 
