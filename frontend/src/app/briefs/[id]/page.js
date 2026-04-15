@@ -1,5 +1,4 @@
 import Link from "next/link"
-import { briefsData } from "../../data/briefsData"
 import { getBriefById } from "../../data/briefsData"
 
 export default async function BriefDetailPage(props) {
@@ -19,9 +18,7 @@ export default async function BriefDetailPage(props) {
           fontFamily: "Inter, sans-serif",
         }}
       >
-        <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-          Brief not found.
-        </div>
+        <div style={{ maxWidth: "900px", margin: "0 auto" }}>Brief not found.</div>
       </main>
     )
   }
@@ -33,10 +30,7 @@ export default async function BriefDetailPage(props) {
 
   const discussionBody =
     safePoints.length > 0
-      ? `${safeSummary}
-
-Key Points:
-- ${safePoints.join("\n- ")}`.trim()
+      ? `${safeSummary}\n\nKey Points:\n- ${safePoints.join("\n- ")}`.trim()
       : safeSummary
 
   const discussionHref = `/thread/new?${new URLSearchParams({
@@ -44,11 +38,6 @@ Key Points:
     title: safeTitle,
     body: discussionBody,
   }).toString()}`
-  const discussionTitle = encodeURIComponent(brief.title)
-  const discussionBody = encodeURIComponent(
-    `${brief.summary}\n\nKey Points:\n- ${(brief.points || []).join("\n- ")}`
-  )
-  const safeDiscussionSubtopic = brief.discussionSubtopic || brief.subtopic || "general-discussion"
 
   function formatDateTime(value) {
     const date = new Date(value)
@@ -151,8 +140,6 @@ Key Points:
 
           <Link
             href={discussionHref}
-          <a
-            href={`/thread/new?subtopic=${encodeURIComponent(safeDiscussionSubtopic)}&title=${discussionTitle}&body=${discussionBody}`}
             style={{
               background: "#f26b1d",
               color: "#111",
