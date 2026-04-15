@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { apiUrl, getStoredToken, readJsonSafely } from "@/lib/api"
+import { apiUrl, getErrorMessage, getStoredToken, readBodySafely } from "@/lib/api"
 
 export default function NewThreadForm({ initialTitle = "", initialBody = "", initialSubtopicSlug = "" }) {
   const router = useRouter()
@@ -30,7 +30,6 @@ export default function NewThreadForm({ initialTitle = "", initialBody = "", ini
 
     const token = getStoredToken()
     if (!token) {
-      window.location.href = "/login"
       const next = `${window.location.pathname}${window.location.search}`
       window.location.href = `/login?next=${encodeURIComponent(next)}`
       return
@@ -47,22 +46,21 @@ export default function NewThreadForm({ initialTitle = "", initialBody = "", ini
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          title,
-          content: body,
-          subtopicSlug: subtopicSlug || undefined,
-          subtopicSlug,
+          title: title.trim(),
+          content: body.trim(),
+          subtopicSlug: subtopicSlug ? subtopicSlug.trim() : undefined,
         }),
       })
 
-      const data = (await readJsonSafely(res)) || {}
+      const data = await readBodySafely(res)
       setLoading(false)
 
-      if (!res.ok || data.error) {
-        setError(data.error || "Failed to create thread")
+      if (!res.ok) {
+        setError(getErrorMessage(data, "Failed to create thread"))
         return
       }
 
-      if (!data.id || typeof data.id !== "number") {
+      if (!data || typeof data.id !== "number") {
         setError("Thread created but no valid id returned")
         return
       }

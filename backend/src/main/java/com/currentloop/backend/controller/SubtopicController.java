@@ -36,7 +36,7 @@ public class SubtopicController {
             return List.of();
         }
 
-        return threadRepository.findBySubtopicId(subtopicOpt.get().getId())
+        return threadRepository.findBySubtopicIdOrderByCreatedAtDesc(subtopicOpt.get().getId())
                 .stream()
                 .map(thread -> toThreadSummary(thread, slug))
                 .toList();

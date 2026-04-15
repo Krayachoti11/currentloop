@@ -4,6 +4,7 @@ import com.currentloop.backend.model.Subtopic;
 import com.currentloop.backend.model.Topic;
 import com.currentloop.backend.repository.SubtopicRepository;
 import com.currentloop.backend.repository.TopicRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,9 +27,9 @@ public class TopicController {
     }
 
     @GetMapping("/{slug}/subtopics")
-    public List<Subtopic> getSubtopics(@PathVariable String slug) {
-        Topic topic = topicRepository.findBySlug(slug)
-                .orElseThrow(() -> new RuntimeException("Topic not found"));
-        return subtopicRepository.findByTopicId(topic.getId());
+    public ResponseEntity<List<Subtopic>> getSubtopics(@PathVariable String slug) {
+        return topicRepository.findBySlug(slug)
+                .map(topic -> ResponseEntity.ok(subtopicRepository.findByTopicId(topic.getId())))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
