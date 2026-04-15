@@ -136,12 +136,6 @@ export default async function ThreadPage(props) {
                 color: "#b7bcc6",
               }}
             >
-              <div style={{ color: "#aeb4bf", fontSize: "13px", marginBottom: "6px" }}>
-                @{reply.username || "deleted-user"} • {reply.createdAt ? new Date(reply.createdAt).toLocaleString() : ""}
-              </div>
-              <div style={{ color: "#fff", fontSize: "15px", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
-                {reply.body}
-              </div>
               No replies yet — be the first to contribute.
             </div>
           ) : (

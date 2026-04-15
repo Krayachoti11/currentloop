@@ -1,11 +1,12 @@
 import Link from "next/link"
-import { apiUrl } from "@/lib/api"
+import { apiUrl, readJsonSafely } from "@/lib/api"
 
 async function getSubtopics(topicSlug) {
   try {
     const res = await fetch(apiUrl(`/api/topics/${topicSlug}/subtopics`), { cache: "no-store" })
     if (!res.ok) return null
-    return res.json()
+    const data = await readJsonSafely(res)
+    return Array.isArray(data) ? data : null
   } catch {
     return null
   }

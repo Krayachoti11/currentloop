@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { apiUrl, readJsonSafely } from "@/lib/api"
+import { apiUrl, getErrorMessage, readBodySafely } from "@/lib/api"
 
 export default function ProfilePage() {
   const [threads, setThreads] = useState([])
   const [username] = useState(() => (typeof window !== "undefined" ? localStorage.getItem("username") || "" : ""))
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
   useEffect(() => {
     const storedUsername = localStorage.getItem("username")
@@ -20,8 +21,11 @@ export default function ProfilePage() {
 
     fetch(apiUrl(`/api/users/${encodeURIComponent(storedUsername)}/threads`))
       .then(async (res) => {
-        if (!res.ok) return []
-        const data = await readJsonSafely(res)
+        const data = await readBodySafely(res)
+        if (!res.ok) {
+          setError(getErrorMessage(data, "Could not load your threads right now."))
+          return []
+        }
         return Array.isArray(data) ? data : []
       })
       .then((rows) => {
@@ -29,6 +33,7 @@ export default function ProfilePage() {
         setLoading(false)
       })
       .catch(() => {
+        setError("Could not load your threads right now.")
         setThreads([])
         setLoading(false)
       })
@@ -97,6 +102,10 @@ export default function ProfilePage() {
 
         {loading ? (
           <div style={{ color: "#b7bcc6", background: "#111827", border: "1px solid #9e8e84", borderRadius: "22px", padding: "16px 18px" }}>Loading your threads…</div>
+        ) : error ? (
+          <div style={{ color: "#fecaca", background: "#111827", border: "1px solid #9e8e84", borderRadius: "22px", padding: "16px 18px" }}>
+            {error}
+          </div>
         ) : threads.length === 0 ? (
           <div
             style={{
