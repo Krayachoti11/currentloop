@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { apiUrl, getStoredToken, readJsonSafely } from "@/lib/api"
+import { apiUrl, getErrorMessage, getStoredToken, readBodySafely } from "@/lib/api"
 
 export default function ReplyBox({ threadId }) {
   const [body, setBody] = useState("")
@@ -16,7 +16,8 @@ export default function ReplyBox({ threadId }) {
 
     const token = getStoredToken()
     if (!token) {
-      window.location.href = "/login"
+      const next = `${window.location.pathname}${window.location.search}`
+      window.location.href = `/login?next=${encodeURIComponent(next)}`
       return
     }
 
@@ -33,11 +34,11 @@ export default function ReplyBox({ threadId }) {
         body: JSON.stringify({ body }),
       })
 
-      const data = (await readJsonSafely(res)) || {}
+      const data = await readBodySafely(res)
       setLoading(false)
 
-      if (!res.ok || data.error) {
-        setError(data.error || "Failed to post reply. Try again.")
+      if (!res.ok) {
+        setError(getErrorMessage(data, "Failed to post reply. Try again."))
         return
       }
 

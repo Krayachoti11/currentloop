@@ -1,12 +1,13 @@
 import Link from "next/link"
-import { apiUrl } from "@/lib/api"
+import { apiUrl, readJsonSafely } from "@/lib/api"
 import { briefsData } from "./data/briefsData"
 
 async function getTopics() {
   try {
     const res = await fetch(apiUrl("/api/topics"), { cache: "no-store" })
     if (!res.ok) return []
-    return res.json()
+    const data = await readJsonSafely(res)
+    return Array.isArray(data) ? data : []
   } catch {
     return []
   }
@@ -16,7 +17,8 @@ async function getSampleThreads() {
   try {
     const res = await fetch(apiUrl("/api/subtopics/football/threads"), { cache: "no-store" })
     if (!res.ok) return []
-    return res.json()
+    const data = await readJsonSafely(res)
+    return Array.isArray(data) ? data : []
   } catch {
     return []
   }
@@ -31,16 +33,16 @@ export default async function Home() {
       style={{
         minHeight: "100vh",
         background: "#0b0f19",
-        padding: "32px 20px 56px",
+        padding: "36px 20px 60px",
         fontFamily: "var(--font-body, Inter, system-ui, sans-serif)",
       }}
     >
       <div style={{ maxWidth: "1040px", margin: "0 auto" }}>
         <section
           style={{
-            marginBottom: "40px",
-            padding: "36px 28px",
-            borderRadius: "32px",
+            marginBottom: "36px",
+            padding: "36px 30px",
+            borderRadius: "28px",
             border: "1px solid #9e8e84",
             background: "linear-gradient(145deg, #111827 0%, #0b0f19 100%)",
             boxShadow: "0 16px 40px rgba(0,0,0,0.35)",
@@ -89,12 +91,13 @@ export default async function Home() {
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "12px 22px",
+                padding: "11px 20px",
                 borderRadius: "999px",
                 background: "#f26b1d",
+                border: "1px solid #f26b1d",
                 color: "#111",
                 fontWeight: 800,
-                fontSize: "15px",
+                fontSize: "14px",
                 textDecoration: "none",
               }}
             >
@@ -106,13 +109,13 @@ export default async function Home() {
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "12px 22px",
+                padding: "11px 20px",
                 borderRadius: "999px",
                 border: "1px solid #9e8e84",
                 background: "transparent",
                 color: "#fff",
                 fontWeight: 700,
-                fontSize: "15px",
+                fontSize: "14px",
                 textDecoration: "none",
               }}
             >
@@ -124,11 +127,13 @@ export default async function Home() {
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "12px 22px",
+                padding: "11px 20px",
                 borderRadius: "999px",
+                border: "1px solid #2a3142",
+                background: "#111827",
                 color: "#f26b1d",
                 fontWeight: 700,
-                fontSize: "15px",
+                fontSize: "14px",
                 textDecoration: "none",
               }}
             >
@@ -141,8 +146,8 @@ export default async function Home() {
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: "24px",
-            marginBottom: "40px",
+            gap: "20px",
+            marginBottom: "36px",
           }}
         >
           <section>
@@ -159,7 +164,7 @@ export default async function Home() {
                     alignItems: "center",
                     gap: "12px",
                     padding: "14px 16px",
-                    borderRadius: "20px",
+                    borderRadius: "22px",
                     border: "1px solid #9e8e84",
                     background: "#111827",
                     textDecoration: "none",
@@ -171,7 +176,7 @@ export default async function Home() {
                 </Link>
               ))}
               {topics.length === 0 ? (
-                <p style={{ color: "#aeb4bf", fontSize: "14px" }}>
+                <p style={{ color: "#aeb4bf", fontSize: "14px", background: "#111827", border: "1px solid #9e8e84", borderRadius: "20px", padding: "14px 16px" }}>
                   Start the API to load topics from the database.
                 </p>
               ) : null}
@@ -189,7 +194,7 @@ export default async function Home() {
                   href={`/thread/${thread.id}`}
                   style={{
                     padding: "14px 16px",
-                    borderRadius: "20px",
+                    borderRadius: "22px",
                     border: "1px solid #9e8e84",
                     background: "#111827",
                     textDecoration: "none",
@@ -203,7 +208,7 @@ export default async function Home() {
                 </Link>
               ))}
               {threads.length === 0 ? (
-                <p style={{ color: "#aeb4bf", fontSize: "14px" }}>
+                <p style={{ color: "#aeb4bf", fontSize: "14px", background: "#111827", border: "1px solid #9e8e84", borderRadius: "20px", padding: "14px 16px" }}>
                   No threads yet — open Community and start one.
                 </p>
               ) : null}
@@ -231,7 +236,7 @@ export default async function Home() {
                 href={`/briefs/${brief.id}`}
                 style={{
                   padding: "18px 18px",
-                  borderRadius: "24px",
+                  borderRadius: "22px",
                   border: "1px solid #9e8e84",
                   background: "#111827",
                   textDecoration: "none",

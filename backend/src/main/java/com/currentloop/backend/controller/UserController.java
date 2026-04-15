@@ -31,7 +31,7 @@ public class UserController {
         }
 
         Long userId = userOpt.get().getId();
-        return threadRepository.findByAuthorId(userId).stream().map(this::toThreadSummary).toList();
+        return threadRepository.findByAuthorIdOrderByCreatedAtDesc(userId).stream().map(this::toThreadSummary).toList();
     }
 
     private Map<String, Object> toThreadSummary(Thread thread) {

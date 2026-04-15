@@ -1,11 +1,11 @@
 import Link from "next/link"
-import { briefsData } from "../../data/briefsData"
+import { getBriefById } from "../../data/briefsData"
 
 export default async function BriefDetailPage(props) {
   const params = await props.params
   const id = params.id
 
-  const brief = briefsData.find((item) => item.id === id)
+  const brief = getBriefById(id)
 
   if (!brief) {
     return (
@@ -18,24 +18,38 @@ export default async function BriefDetailPage(props) {
           fontFamily: "Inter, sans-serif",
         }}
       >
-        <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-          Brief not found.
-        </div>
+        <div style={{ maxWidth: "900px", margin: "0 auto" }}>Brief not found.</div>
       </main>
     )
   }
 
-  const discussionTitle = encodeURIComponent(brief.title)
-  const discussionBody = encodeURIComponent(
-    `${brief.summary}\n\nKey Points:\n- ${brief.points.join("\n- ")}`
-  )
+  const safeSubtopic = (brief.discussionSubtopic || brief.subtopic || "").trim()
+  const safeTitle = (brief.title || "Start a discussion").trim()
+  const safeSummary = (brief.summary || "").trim()
+  const safePoints = Array.isArray(brief.points) ? brief.points.filter(Boolean) : []
+
+  const discussionBody =
+    safePoints.length > 0
+      ? `${safeSummary}\n\nKey Points:\n- ${safePoints.join("\n- ")}`.trim()
+      : safeSummary
+
+  const discussionHref = `/thread/new?${new URLSearchParams({
+    subtopic: safeSubtopic,
+    title: safeTitle,
+    body: discussionBody,
+  }).toString()}`
+
+  function formatDateTime(value) {
+    const date = new Date(value)
+    return Number.isNaN(date.getTime()) ? "Unknown update time" : date.toLocaleString()
+  }
 
   return (
     <main
       style={{
         minHeight: "100vh",
         background: "#0b0f19",
-        padding: "28px 20px 40px 20px",
+        padding: "32px 20px 44px",
         fontFamily: "Inter, sans-serif",
       }}
     >
@@ -59,7 +73,7 @@ export default async function BriefDetailPage(props) {
           style={{
             background: "#111827",
             border: "1px solid #9e8e84",
-            borderRadius: "28px",
+            borderRadius: "24px",
             padding: "28px 28px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
             marginBottom: "22px",
@@ -73,7 +87,7 @@ export default async function BriefDetailPage(props) {
               marginBottom: "14px",
             }}
           >
-            {brief.tags.map((tag) => (
+            {(brief.tags || []).map((tag) => (
               <span
                 key={tag}
                 style={{
@@ -110,7 +124,7 @@ export default async function BriefDetailPage(props) {
               marginBottom: "20px",
             }}
           >
-            Updated {new Date(brief.updatedAt).toLocaleString()}
+            Updated {formatDateTime(brief.updatedAt)}
           </div>
 
           <div
@@ -124,28 +138,30 @@ export default async function BriefDetailPage(props) {
             {brief.summary}
           </div>
 
-          <a
-            href={`/thread/new?subtopic=${encodeURIComponent(brief.discussionSubtopic)}&title=${discussionTitle}&body=${discussionBody}`}
+          <Link
+            href={discussionHref}
             style={{
               background: "#f26b1d",
               color: "#111",
               textDecoration: "none",
-              padding: "12px 20px",
+              padding: "11px 20px",
+              border: "1px solid #f26b1d",
               borderRadius: "999px",
               fontSize: "14px",
               fontWeight: "800",
+              boxShadow: "0 8px 20px rgba(242,107,29,0.25)",
               display: "inline-block",
             }}
           >
             Start Discussion
-          </a>
+          </Link>
         </div>
 
         <div
           style={{
             background: "#111827",
             border: "1px solid #9e8e84",
-            borderRadius: "28px",
+            borderRadius: "24px",
             padding: "24px 24px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
             marginBottom: "22px",
@@ -163,13 +179,13 @@ export default async function BriefDetailPage(props) {
           </h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {brief.points.map((point, index) => (
+            {(brief.points || []).map((point, index) => (
               <div
                 key={index}
                 style={{
                   background: "#0b0f19",
                   border: "1px solid #9e8e84",
-                  borderRadius: "22px",
+                  borderRadius: "20px",
                   padding: "16px 18px",
                   color: "#d8dde6",
                   fontSize: "15px",
@@ -186,7 +202,7 @@ export default async function BriefDetailPage(props) {
           style={{
             background: "#111827",
             border: "1px solid #9e8e84",
-            borderRadius: "28px",
+            borderRadius: "24px",
             padding: "24px 24px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
           }}
@@ -203,16 +219,16 @@ export default async function BriefDetailPage(props) {
           </h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {brief.sourceLinks.map((source, index) => (
+            {(brief.sourceLinks || []).map((source, index) => (
               <a
                 key={index}
-                href={source.url}
+                href={source.url || "#"}
                 target="_blank"
                 rel="noreferrer"
                 style={{
                   background: "#0b0f19",
                   border: "1px solid #9e8e84",
-                  borderRadius: "22px",
+                  borderRadius: "20px",
                   padding: "16px 18px",
                   color: "#fff",
                   textDecoration: "none",
@@ -220,7 +236,7 @@ export default async function BriefDetailPage(props) {
                   fontWeight: "700",
                 }}
               >
-                {source.label}
+                {source.label || `Source ${index + 1}`}
               </a>
             ))}
           </div>

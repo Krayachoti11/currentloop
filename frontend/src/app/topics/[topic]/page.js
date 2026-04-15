@@ -1,11 +1,12 @@
 import Link from "next/link"
-import { apiUrl } from "@/lib/api"
+import { apiUrl, readJsonSafely } from "@/lib/api"
 
 async function getSubtopics(topicSlug) {
   try {
     const res = await fetch(apiUrl(`/api/topics/${topicSlug}/subtopics`), { cache: "no-store" })
     if (!res.ok) return null
-    return res.json()
+    const data = await readJsonSafely(res)
+    return Array.isArray(data) ? data : null
   } catch {
     return null
   }
@@ -40,7 +41,7 @@ export default async function TopicPage(props) {
       style={{
         minHeight: "100vh",
         background: "#f26b1d",
-        padding: "28px 20px 48px",
+        padding: "32px 20px 48px",
         fontFamily: "var(--font-body, Inter, system-ui, sans-serif)",
       }}
     >
@@ -64,7 +65,7 @@ export default async function TopicPage(props) {
           style={{
             background: "#0b0f19",
             border: "1px solid #9e8e84",
-            borderRadius: "28px",
+            borderRadius: "24px",
             padding: "26px 24px",
             marginBottom: "28px",
             boxShadow: "0 10px 28px rgba(0,0,0,0.25)",
@@ -100,7 +101,7 @@ export default async function TopicPage(props) {
               style={{
                 display: "block",
                 padding: "18px 18px",
-                borderRadius: "22px",
+                borderRadius: "20px",
                 border: "1px solid #9e8e84",
                 background: "#0b0f19",
                 color: "#fff",
